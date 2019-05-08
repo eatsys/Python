@@ -1,0 +1,9 @@
+cat .//proc//wlan0//mib_rf |grep chipVersion
+****************************************
+** Error! Command ACK Receive failed. **
+****************************************
+flash read
+****************************************
+** Error! Command ACK Receive failed. **
+****************************************
+iwpriv wlan0 mp_stop

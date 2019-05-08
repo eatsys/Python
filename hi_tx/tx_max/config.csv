@@ -1,0 +1,11 @@
+DUT_IP,192.168.100.1
+username,root
+password,admin
+addition1,su
+addition2,shell
+addition3,
+log_enable,0
+sleep_time,0.2
+IQ_IP,192.168.100.254
+IQ_Port,1
+IQ_Rout,1

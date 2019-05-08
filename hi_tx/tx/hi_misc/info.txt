@@ -1,0 +1,72 @@
+使能线损使用 2为table名称
+MVSG1;RFC:USE "2",RF1
+MVSG1;RFC:USE "2",RF2
+MVSA1;RFC:USE "2",RF1
+MVSA1;RFC:USE "2",RF2
+MVSA1;RFC:STAT  ON,RF2
+
+
+设置仪表为接收模式，测试TX
+MROUT1;PORT:RES RF1,VSA1
+
+设置调制模式
+CHAN1;WIFI;CONF:STAN DSSS
+CHAN1;WIFI;CONF:STAN OFDM
+CHAN1;WIFI;CONF:OFDM:CEST DATA //fullpacket
+
+设置频率
+VSA1;FREQ:cent 2412000000
+
+自动调制测试参考电平
+VSA1 ;RLEVel:AUTO
+VSA1;RLEV 30  //手动设置
+
+设置采样速率
+VSA1;SRAT 80000000
+
+设置抓取时间长度，单位s
+VSA1;CAPT:TIME 0.01
+
+设置tigger方式
+VSA1;TRIG:SOUR IMMediate
+
+power
+WIFI;FETC:SEGM:POW:AVER?
+
+获得txqulity
+WIFI;FETC:SEGM:TXQ:DSSS:AVER?
+
+mask
+WIFI;FETC:SEGM:SPEC:AVER:CHEC? \\0 is OK 1 is fail
+WIFI;FETC:SEGM:SPEC:AVER:VIOL? \\%
+
+OBW
+WIFI;FETC:SEGM:SPEC:AVER:OBW?
+
+RAMP
+WIFI;FETC:SEGM:RAMP:OFF:TRIS?
+WIFI;FETC:SEGM:RAMP:ON:TRIS?
+
+flatness
+WIFI;FETC:SEGM:OFDM:SFL:AVER:CHEC?
+WIFI;FETC:SEGM:OFDM:SFL:AVER?
+
+
+
+WIFI;FETC:SEGM:POW:AVER?;*WAI;*wai;*opc?
+
+
+iq
+dut
+control
+report
+
+
+hipriv.sh "vap0 set_tx_pow rf_reg_ctl 1"
+hipriv.sh "vap0 reginfo soc 0x200380a4 0x200380a4";dmesg -c
+hipriv.sh "vap0 regwrite soc 0x20038098 0x10"
+hipriv.sh "vap0 regwrite soc 0x20038094 0x10"
+hipriv.sh "vap0 regwrite soc 0x20038090 0x10"
+hipriv.sh "vap0 regwrite soc 0x200380a8 0x10"
+hipriv.sh "vap0 regwrite soc 0x200380a4 0x10"
+hipriv.sh "vap0 regwrite soc 0x200380a0 0x10"

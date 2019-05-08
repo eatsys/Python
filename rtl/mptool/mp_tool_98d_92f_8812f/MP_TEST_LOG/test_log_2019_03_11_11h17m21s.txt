@@ -1,0 +1,6 @@
+cat .//proc//wlan0//mib_rf |grep chipVersion
+flash read
+iwpriv wlan0 mp_stop
+ifconfig wlan0 down
+ifconfig wlan1 down
+ifconfig wlan0 up

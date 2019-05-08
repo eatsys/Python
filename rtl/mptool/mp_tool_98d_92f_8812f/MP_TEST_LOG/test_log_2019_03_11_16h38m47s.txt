@@ -1,0 +1,40 @@
+cat .//proc//wlan0//mib_rf |grep chipVersion
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+cat .//proc//wlan0//mib_rf |grep MIMO_TR_hw_support
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+cat .//proc//wlan0//mib_rf |grep Antdiv_Type
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+ifconfig wlan0 down
+ifconfig wlan0 up
+iwpriv wlan0 mp_start
+iwpriv wlan0 mp_version >//tmp//MP.txt
+flash read
+flash read
+iwpriv wlan0 mp_bandwidth 40M=0,shortGI=0,txsc=0
+iwpriv wlan0 mp_channel 1,channel2=-1,syn=0
+iwpriv wlan0 mp_txpower patha=11,pathb=11
+iwpriv wlan0 mp_version >//tmp//MP.txt
+flash read
+flash read
+iwpriv wlan0 mp_txpower patha=11,pathb=11
+flash get HW_WLAN1_WLAN_ADDR
+flash read
+flash get HW_WLAN0_11N_TRSWPAPE_C9
+flash read
+iwpriv wlan0 get_mib use_efuse >//tmp//MP.txt
+flash read
+flash get HW_WLAN0_11N_THER
+flash read
+iwpriv wlan0 mp_stop
+ifconfig wlan0 down
+ifconfig wlan1 down
+ifconfig wlan0 up

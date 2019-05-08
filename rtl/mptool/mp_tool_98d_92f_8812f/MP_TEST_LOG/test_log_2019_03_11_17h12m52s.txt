@@ -1,0 +1,123 @@
+cat .//proc//wlan0//mib_rf |grep chipVersion
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+cat .//proc//wlan1//mib_rf |grep chipVersion
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+cat .//proc//wlan0//mib_rf |grep MIMO_TR_hw_support
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+cat .//proc//wlan0//mib_rf |grep Antdiv_Type
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 set_mib macPhyMode=0
+iwpriv wlan1 set_mib macPhyMode=0
+iwpriv wlan0 set_mib mp_specific=1
+iwpriv wlan0 set_mib phyBandSelect=1
+iwpriv wlan1 set_mib mp_specific=1
+iwpriv wlan1 set_mib phyBandSelect=2
+ifconfig wlan0 down
+ifconfig wlan0 up
+iwpriv wlan0 mp_start
+ifconfig wlan1 down
+ifconfig wlan1 up
+iwpriv wlan1 mp_start
+iwpriv wlan0 mp_version >//tmp//MP.txt
+flash read
+flash read
+iwpriv wlan0 mp_bandwidth 40M=0,shortGI=0,txsc=0
+iwpriv wlan0 mp_channel 1,channel2=-1,syn=0
+iwpriv wlan0 mp_txpower patha=11,pathb=11
+iwpriv wlan0 mp_version >//tmp//MP.txt
+flash read
+flash read
+iwpriv wlan0 mp_txpower patha=11,pathb=11
+iwpriv wlan0 mp_channel 6,channel2=-1,syn=0
+iwpriv wlan0 mp_txpower patha=11,pathb=11
+iwpriv wlan0 mp_channel 10,channel2=-1,syn=0
+iwpriv wlan0 mp_txpower patha=11,pathb=11
+iwpriv wlan0 mp_dig off
+cat .//proc//wlan1//mib_rf |grep MIMO_TR_hw_support
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+cat .//proc//wlan1//mib_rf |grep Antdiv_Type
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+iwpriv wlan1 mp_version >//tmp//MP.txt
+flash read
+flash read
+cat .//proc//wlan1//mib_rf |grep rfe_type
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+iwpriv wlan1 mp_bandwidth 40M=0,shortGI=0,txsc=0
+iwpriv wlan1 mp_channel 36,channel2=-1,syn=0
+iwpriv wlan1 mp_txpower patha=11,pathb=11
+iwpriv wlan1 mp_version >//tmp//MP.txt
+flash read
+flash read
+iwpriv wlan1 mp_txpower patha=11,pathb=11
+iwpriv wlan1 mp_ant_tx a
+iwpriv wlan1 mp_channel 149,channel2=-1,syn=0
+iwpriv wlan1 mp_txpower patha=11,pathb=11
+iwpriv wlan1 mp_channel 161,channel2=-1,syn=0
+iwpriv wlan1 mp_txpower patha=11,pathb=11
+iwpriv wlan1 mp_txpower patha=20,pathb=11
+iwpriv wlan1 mp_txpower patha=20,pathb=26
+iwpriv wlan1 mp_rate 36
+iwpriv wlan1 mp_txpower patha=20,pathb=26
+iwpriv wlan1 mp_rate 96
+iwpriv wlan1 mp_txpower patha=20,pathb=26
+iwpriv wlan1 mp_rate 48
+iwpriv wlan1 mp_txpower patha=20,pathb=26
+iwpriv wlan1 mp_dig off
+cat .//proc//wlan0//mib_rf |grep MIMO_TR_hw_support
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+cat .//proc//wlan0//mib_rf |grep Antdiv_Type
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 mp_version >//tmp//MP.txt
+flash read
+flash read
+cat .//proc//wlan0//mib_rf |grep rfe_type
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 mp_bandwidth 40M=0,shortGI=0,txsc=0
+iwpriv wlan0 mp_channel 1,channel2=-1,syn=0
+iwpriv wlan0 mp_txpower patha=11,pathb=11
+iwpriv wlan0 mp_version >//tmp//MP.txt
+flash read
+flash read
+iwpriv wlan0 mp_txpower patha=11,pathb=11
+iwpriv wlan0 mp_ant_tx a
+iwpriv wlan0 mp_txpower patha=17,pathb=11
+iwpriv wlan0 mp_txpower patha=25,pathb=11
+iwpriv wlan0 mp_txpower patha=25,pathb=19
+iwpriv wlan0 mp_rate 48
+iwpriv wlan0 mp_txpower patha=25,pathb=19
+iwpriv wlan0 mp_rate 108
+iwpriv wlan0 mp_txpower patha=25,pathb=19
+iwpriv wlan0 mp_stop
+ifconfig wlan0 down
+ifconfig wlan1 down
+ifconfig wlan0 up

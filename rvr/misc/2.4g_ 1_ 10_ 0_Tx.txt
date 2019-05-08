@@ -1,0 +1,774 @@
+                                   IXCHARIOT
+
+
+SUMMARY - D:/WORK/REAMON/PYTHON/RVR/RESULT/IXCHARIOTOD/ 1931/ 2.4G_ 1_ 10_
+0_TX.TST
+
+Console version      6.70
+Console build level  44
+Console product type IxChariot
+Filename             D:/work/Reamon/Python/rvr/Result/IxChariotOD/ 1931/ 2.4g_ 1_ 10_ 0_Tx.tst
+Run start time       2019年4月26日, 9:25:17
+Run end time         2019年4月26日, 9:25:37
+Elapsed time         00:00:20
+How the test ended   Ran to completion
+Number of pairs      4
+
+
+RUN OPTIONS
+
+End type                                               Run for a fixed duration
+Duration                                               00:00:20
+Reporting type                                         Batch
+Automatically poll endpoints                           No
+Stop run upon initialization failure                   Yes
+Connect timeout during test (minutes)                  0
+Stop test after this many running pairs fail           1
+Collect endpoint CPU utilization                       No
+Collect TCP statistics                                 No
+Allow pair reinitialization for setup                  No
+Maximum number of setup reinitializations              3
+Setup reinitialization wait interval (milliseconds)    10
+Allow pair reinitialization at runtime                 No
+Maximum number of runtime reinitializations            3
+Runtime reinitialization wait interval (milliseconds)  10
+Validate data upon receipt                             No
+Use a new seed for random variables on every run       Yes
+Enable Ixia hardware timestamps                        Yes
+Clock synchronization                                  'Endpoint'
+Console Service Quality
+Endpoint Service Quality
+
+
+TEST SETUP (CONSOLE TO ENDPOINT 1)
+
+          Console                Console
+Group/    Knows         Console  Service Pair
+Pair      Endpoint 1    Protocol Quality Comment
+--------- ------------- -------- ------- -------
+All Pairs
+ 1        192.168.1.123 TCP      n/a
+ 2        192.168.1.123 TCP      n/a
+ 3        192.168.1.123 TCP      n/a
+ 4        192.168.1.123 TCP      n/a
+
+
+TEST SETUP (ENDPOINT 1 TO ENDPOINT 2)
+
+          Endpoint 1             UDP
+          Knows         Endpoint compliant
+Group/    Endpoint 2    2 Setup  with
+Pair      (Setup)       Protocol RFC768
+--------- ------------- -------- ---------
+All Pairs
+ 1        192.168.1.111 TCP      n/a
+ 2        192.168.1.111 TCP      n/a
+ 3        192.168.1.111 TCP      n/a
+ 4        192.168.1.111 TCP      n/a
+
+
+TEST EXECUTION (ENDPOINT 1 TO ENDPOINT 2)
+
+Group/                                Network  Service
+Pair      Endpoint 1    Endpoint 2    Protocol Quality Script/Stream Name
+--------- ------------- ------------- -------- ------- -------------------------------
+All Pairs
+ 1        192.168.1.123 192.168.1.111 TCP              High_Performance_Throughput.scr
+ 2        192.168.1.123 192.168.1.111 TCP              High_Performance_Throughput.scr
+ 3        192.168.1.123 192.168.1.111 TCP              High_Performance_Throughput.scr
+ 4        192.168.1.123 192.168.1.111 TCP              High_Performance_Throughput.scr
+
+
+THROUGHPUT
+
+                                  Throughput
+                                         95% Measured
+Group/    Average Minimum Maximum Confidence     Time  Relative
+Pair       (Mbps)  (Mbps)  (Mbps)   Interval   (secs) Precision
+--------- ------- ------- ------- ---------- -------- ---------
+All Pairs 945.216  77.821 536.913
+ 1        457.861 237.389 536.913     22.066   19.744     4.819
+ 2        198.652 138.169 375.587     23.173   19.733    11.665
+ 3        127.638  77.821 242.424     12.090   19.430     9.472
+ 4        165.782 100.503 291.971     17.861   19.785    10.774
+Totals:   945.216  77.821 536.913
+
+
+TRANSACTION RATE
+
+                                              Transaction
+          Transaction Transaction Transaction    Rate 95% Measured
+Group/           Rate        Rate        Rate  Confidence     Time  Relative
+Pair          Average     Minimum     Maximum    Interval   (secs) Precision
+--------- ----------- ----------- ----------- ----------- -------- ---------
+All Pairs      11.874       0.973       6.711
+ 1              5.723       2.967       6.711       0.276   19.744     4.819
+ 2              2.483       1.727       4.695       0.290   19.733    11.665
+ 3              1.595       0.973       3.030       0.151   19.430     9.472
+ 4              2.072       1.256       3.650       0.223   19.785    10.774
+Totals:        11.874       0.973       6.711
+
+
+RESPONSE TIME
+
+                                       Response
+          Response Response Response   Time 95% Measured
+Group/        Time     Time     Time Confidence     Time  Relative
+Pair       Average  Minimum  Maximum   Interval   (secs) Precision
+--------- -------- -------- -------- ---------- -------- ---------
+All Pairs    0.422    0.149    1.028
+ 1           0.175    0.149    0.337      0.008   19.744     4.819
+ 2           0.403    0.213    0.579      0.047   19.733    11.665
+ 3           0.627    0.330    1.028      0.059   19.430     9.472
+ 4           0.483    0.274    0.796      0.052   19.785    10.774
+Totals:      0.422    0.149    1.028
+
+
+ENDPOINT CONFIGURATION
+
+                                                               E1                       E1 use    E1                                                           E2                       E2 use    E2
+Group/                                                 E1      Build                    encrypted actual                                               E2      Build                    encrypted actual
+Pair      E1 Operating System                          Version Level E1 Product Type    flows     address E2 Operating System                          Version Level E2 Product Type    flows     address
+--------- -------------------------------------------- ------- ----- ------------------ --------- ------- -------------------------------------------- ------- ----- ------------------ --------- -------
+All Pairs
+ 1        Windows XP 64-bit on AMD64 (32-bit endpoint) 6.0     068   Retail (Web-Based) n/a               Windows XP 64-bit on AMD64 (32-bit endpoint) 6.0     068   Retail (Web-Based) n/a
+ 2        Windows XP 64-bit on AMD64 (32-bit endpoint) 6.0     068   Retail (Web-Based) n/a               Windows XP 64-bit on AMD64 (32-bit endpoint) 6.0     068   Retail (Web-Based) n/a
+ 3        Windows XP 64-bit on AMD64 (32-bit endpoint) 6.0     068   Retail (Web-Based) n/a               Windows XP 64-bit on AMD64 (32-bit endpoint) 6.0     068   Retail (Web-Based) n/a
+ 4        Windows XP 64-bit on AMD64 (32-bit endpoint) 6.0     068   Retail (Web-Based) n/a               Windows XP 64-bit on AMD64 (32-bit endpoint) 6.0     068   Retail (Web-Based) n/a
+
+
+RAW DATA TOTALS
+
+           Number
+               of                              Bytes Measured
+Group/     Timing Transaction    Bytes Sent Received     Time  Relative
+Pair      Records       Count         by E1    by E1   (secs) Precision
+--------- ------- ----------- ------------- -------- -------- ---------
+All Pairs     234         234 2,340,000,000      234
+ 1            113         113 1,130,000,000      113   19.744     4.819
+ 2             49          49   490,000,000       49   19.733    11.665
+ 3             31          31   310,000,000       31   19.430     9.472
+ 4             41          41   410,000,000       41   19.785    10.774
+Totals:       234         234 2,340,000,000      234
+_______________________________________________________________________________
+
+
+GROUP: ALL PAIRS / PAIR: 1
+
+Endpoint 1                          192.168.1.123
+Endpoint 2                          192.168.1.111
+Network Protocol                    TCP
+Service Quality
+Script/Stream Name                  High_Performance_Throughput.scr
+Pair Comment
+Console Knows Endpoint 1            192.168.1.123
+Console Protocol                    TCP
+Console Service Quality             n/a
+Endpoint 1 Knows Endpoint 2 (Setup) 192.168.1.111
+Endpoint 2 Setup Protocol           TCP
+
+
+Script
+High_Performance_Throughput.scr, version 6.40 -- High Performance Throughput
+
+Endpoint 1                     Endpoint 2
+------------------------------ -------------------------------
+SLEEP
+  initial_delay=0
+CONNECT_INITIATE               CONNECT_ACCEPT
+  source_port=AUTO               destination_port=AUTO
+  0                              0
+  0                              0
+LOOP                           LOOP
+  number_of_timing_records=100   number_of_timing_records=100
+  START_TIMER
+  LOOP                           LOOP
+    transactions_per_record=1      transactions_per_record=1
+    SEND                           RECEIVE
+      file_size=10000000             file_size=10000000
+      send_buffer_size=65535         receive_buffer_size=65535
+      send_datatype=NOCOMPRESS
+      send_data_rate=UNLIMITED
+    CONFIRM_REQUEST                CONFIRM_ACKNOWLEDGE
+    INCREMENT_TRANSACTION
+  END_LOOP                       END_LOOP
+  END_TIMER
+  SLEEP
+    transaction_delay=0
+END_LOOP                       END_LOOP
+DISCONNECT                     DISCONNECT
+  close_type=Reset               close_type=Reset
+
+
+Variable Name                 Value Description
+------------------------ ---------- --------------------------------------
+initial_delay                     0 Pause before the first transaction
+number_of_timing_records        100 How many timing records to generate
+transactions_per_record           1 Transactions per timing record
+file_size                  10000000 How many bytes in the transferred file
+send_buffer_size              65535 How many bytes of data in each SEND
+receive_buffer_size           65535 How many bytes of data in each RECEIVE
+transaction_delay                 0 Milliseconds to pause
+send_datatype            NOCOMPRESS What type of data to send
+send_data_rate            UNLIMITED How fast to send data
+destination_port               AUTO What port to use for Endpoint 2
+close_type                    Reset How connections are terminated
+source_port                    AUTO What port to use for Endpoint 1
+
+
+Endpoint Configuration Details
+
+192.168.1.123 to 192.168.1.111 running TCP, using
+High_Performance_Throughput.scr
+
+Endpoint 1 Type       Endpoint 1 Value                             Endpoint 2 Type       Endpoint 2 Value
+--------------------- -------------------------------------------- --------------------- --------------------------------------------
+E1 Version            6.0                                          E2 Version            6.0
+E1 Build Level        068                                          E2 Build Level        068
+E1 Product Type       Retail (Web-Based)                           E2 Product Type       Retail (Web-Based)
+E1 Operating System   Windows XP 64-bit on AMD64 (32-bit endpoint) E2 Operating System   Windows XP 64-bit on AMD64 (32-bit endpoint)
+E1 CPU Utilization    Supported                                    E2 CPU Utilization    Supported
+OS Version (major)    6                                            OS Version (major)    6
+OS Version (minor)    1                                            OS Version (minor)    1
+OS Build Number       7601                                         OS Build Number       7601
+CSD Version           Service Pack 1                               CSD Version           Service Pack 1
+Memory                8188708 (KB)                                 Memory                16655188 (KB)
+TCP Default Send Size 32767                                        TCP Default Send Size 32767
+UDP Default Send Size 8183                                         UDP Default Send Size 8183
+RTP Default Send Size 8180                                         RTP Default Send Size 8180
+
+
+Timing Records
+
+192.168.1.123 to 192.168.1.111 running TCP, using
+High_Performance_Throughput.scr
+
+Timing Elapsed Measured Inactive             Trans. Response
+Record    Time     Time     Time Throughput    Rate     Time
+Number   (sec)    (sec)    (sec)     (Mbps) (#/sec)    (sec)
+------ ------- -------- -------- ---------- ------- --------
+     1   0.338    0.337             237.389   2.967    0.337
+     2   0.499    0.161             496.894   6.211    0.161
+     3   0.650    0.151             529.801   6.623    0.151
+     4   0.802    0.151             529.801   6.623    0.151
+     5   0.953    0.151             529.801   6.623    0.151
+     6   1.104    0.151             529.801   6.623    0.151
+     7   1.256    0.151             529.801   6.623    0.151
+     8   1.407    0.151             529.801   6.623    0.151
+     9   1.558    0.150             533.333   6.667    0.150
+    10   1.709    0.150             533.333   6.667    0.150
+    11   1.859    0.150             533.333   6.667    0.150
+    12   2.010    0.150             533.333   6.667    0.150
+    13   2.162    0.151             529.801   6.623    0.151
+    14   2.314    0.152             526.316   6.579    0.152
+    15   2.465    0.151             529.801   6.623    0.151
+    16   2.617    0.152             526.316   6.579    0.152
+    17   2.768    0.150             533.333   6.667    0.150
+    18   2.920    0.151             529.801   6.623    0.151
+    19   3.071    0.151             529.801   6.623    0.151
+    20   3.225    0.153             522.876   6.536    0.153
+    21   3.376    0.151             529.801   6.623    0.151
+    22   3.531    0.154             519.481   6.494    0.154
+    23   3.682    0.151             529.801   6.623    0.151
+    24   3.834    0.152             526.316   6.579    0.152
+    25   3.986    0.151             529.801   6.623    0.151
+    26   4.138    0.151             529.801   6.623    0.151
+    27   4.290    0.152             526.316   6.579    0.152
+    28   4.443    0.152             526.316   6.579    0.152
+    29   4.595    0.152             526.316   6.579    0.152
+    30   4.747    0.151             529.801   6.623    0.151
+    31   4.901    0.154             519.481   6.494    0.154
+    32   5.055    0.153             522.876   6.536    0.153
+    33   5.207    0.152             526.316   6.579    0.152
+    34   5.362    0.154             519.481   6.494    0.154
+    35   5.513    0.151             529.801   6.623    0.151
+    36   5.667    0.153             522.876   6.536    0.153
+    37   5.818    0.151             529.801   6.623    0.151
+    38   5.973    0.154             519.481   6.494    0.154
+    39   6.127    0.153             522.876   6.536    0.153
+    40   6.282    0.154             519.481   6.494    0.154
+    41   6.435    0.152             526.316   6.579    0.152
+    42   6.587    0.152             526.316   6.579    0.152
+    43   6.738    0.150             533.333   6.667    0.150
+    44   6.891    0.152             526.316   6.579    0.152
+    45   7.043    0.152             526.316   6.579    0.152
+    46   7.195    0.152             526.316   6.579    0.152
+    47   7.347    0.151             529.801   6.623    0.151
+    48   7.499    0.151             529.801   6.623    0.151
+    49   7.650    0.150             533.333   6.667    0.150
+    50   7.802    0.152             526.316   6.579    0.152
+    51   7.955    0.152             526.316   6.579    0.152
+    52   8.106    0.151             529.801   6.623    0.151
+    53   8.258    0.151             529.801   6.623    0.151
+    54   8.410    0.152             526.316   6.579    0.152
+    55   8.562    0.151             529.801   6.623    0.151
+    56   8.714    0.152             526.316   6.579    0.152
+    57   8.866    0.151             529.801   6.623    0.151
+    58   9.019    0.152             526.316   6.579    0.152
+    59   9.172    0.153             522.876   6.536    0.153
+    60   9.325    0.152             526.316   6.579    0.152
+    61   9.476    0.151             529.801   6.623    0.151
+    62   9.628    0.151             529.801   6.623    0.151
+    63   9.780    0.152             526.316   6.579    0.152
+    64   9.932    0.152             526.316   6.579    0.152
+    65  10.083    0.151             529.801   6.623    0.151
+    66  10.237    0.153             522.876   6.536    0.153
+    67  10.387    0.149             536.913   6.711    0.149
+    68  10.539    0.152             526.316   6.579    0.152
+    69  10.691    0.152             526.316   6.579    0.152
+    70  10.844    0.152             526.316   6.579    0.152
+    71  10.996    0.152             526.316   6.579    0.152
+    72  11.149    0.152             526.316   6.579    0.152
+    73  11.300    0.151             529.801   6.623    0.151
+    74  11.452    0.151             529.801   6.623    0.151
+    75  11.604    0.152             526.316   6.579    0.152
+    76  11.755    0.150             533.333   6.667    0.150
+    77  11.907    0.152             526.316   6.579    0.152
+    78  12.061    0.153             522.876   6.536    0.153
+    79  12.213    0.152             526.316   6.579    0.152
+    80  12.365    0.151             529.801   6.623    0.151
+    81  12.516    0.150             533.333   6.667    0.150
+    82  12.668    0.151             529.801   6.623    0.151
+    83  12.820    0.152             526.316   6.579    0.152
+    84  12.972    0.152             526.316   6.579    0.152
+    85  13.125    0.152             526.316   6.579    0.152
+    86  13.278    0.153             522.876   6.536    0.153
+    87  13.430    0.152             526.316   6.579    0.152
+    88  13.592    0.161             496.894   6.211    0.161
+    89  13.807    0.215             372.093   4.651    0.215
+    90  14.022    0.215             372.093   4.651    0.215
+    91  14.238    0.215             372.093   4.651    0.215
+    92  14.452    0.213             375.587   4.695    0.213
+    93  14.665    0.213             375.587   4.695    0.213
+    94  14.881    0.215             372.093   4.651    0.215
+    95  15.096    0.215             372.093   4.651    0.215
+    96  15.310    0.214             373.832   4.673    0.214
+    97  15.524    0.213             375.587   4.695    0.213
+    98  15.739    0.215             372.093   4.651    0.215
+    99  15.955    0.215             372.093   4.651    0.215
+   100  16.230    0.274             291.971   3.650    0.274
+   101  16.506    0.275             290.909   3.636    0.275
+   102  16.781    0.275             290.909   3.636    0.275
+   103  17.058    0.276             289.855   3.623    0.276
+   104  17.332    0.273             293.040   3.663    0.273
+   105  17.607    0.274             291.971   3.650    0.274
+   106  17.883    0.275             290.909   3.636    0.275
+   107  18.155    0.271             295.203   3.690    0.271
+   108  18.431    0.275             290.909   3.636    0.275
+   109  18.706    0.275             290.909   3.636    0.275
+   110  18.980    0.274             291.971   3.650    0.274
+   111  19.255    0.274             291.971   3.650    0.274
+   112  19.531    0.275             290.909   3.636    0.275
+   113  19.805    0.274             291.971   3.650    0.274
+_______________________________________________________________________________
+
+
+GROUP: ALL PAIRS / PAIR: 2
+
+Endpoint 1                          192.168.1.123
+Endpoint 2                          192.168.1.111
+Network Protocol                    TCP
+Service Quality
+Script/Stream Name                  High_Performance_Throughput.scr
+Pair Comment
+Console Knows Endpoint 1            192.168.1.123
+Console Protocol                    TCP
+Console Service Quality             n/a
+Endpoint 1 Knows Endpoint 2 (Setup) 192.168.1.111
+Endpoint 2 Setup Protocol           TCP
+
+
+Script
+High_Performance_Throughput.scr, version 6.40 -- High Performance Throughput
+
+Endpoint 1                     Endpoint 2
+------------------------------ -------------------------------
+SLEEP
+  initial_delay=0
+CONNECT_INITIATE               CONNECT_ACCEPT
+  source_port=AUTO               destination_port=AUTO
+  0                              0
+  0                              0
+LOOP                           LOOP
+  number_of_timing_records=100   number_of_timing_records=100
+  START_TIMER
+  LOOP                           LOOP
+    transactions_per_record=1      transactions_per_record=1
+    SEND                           RECEIVE
+      file_size=10000000             file_size=10000000
+      send_buffer_size=65535         receive_buffer_size=65535
+      send_datatype=NOCOMPRESS
+      send_data_rate=UNLIMITED
+    CONFIRM_REQUEST                CONFIRM_ACKNOWLEDGE
+    INCREMENT_TRANSACTION
+  END_LOOP                       END_LOOP
+  END_TIMER
+  SLEEP
+    transaction_delay=0
+END_LOOP                       END_LOOP
+DISCONNECT                     DISCONNECT
+  close_type=Reset               close_type=Reset
+
+
+Variable Name                 Value Description
+------------------------ ---------- --------------------------------------
+initial_delay                     0 Pause before the first transaction
+number_of_timing_records        100 How many timing records to generate
+transactions_per_record           1 Transactions per timing record
+file_size                  10000000 How many bytes in the transferred file
+send_buffer_size              65535 How many bytes of data in each SEND
+receive_buffer_size           65535 How many bytes of data in each RECEIVE
+transaction_delay                 0 Milliseconds to pause
+send_datatype            NOCOMPRESS What type of data to send
+send_data_rate            UNLIMITED How fast to send data
+destination_port               AUTO What port to use for Endpoint 2
+close_type                    Reset How connections are terminated
+source_port                    AUTO What port to use for Endpoint 1
+
+
+Endpoint Configuration Details
+
+192.168.1.123 to 192.168.1.111 running TCP, using
+High_Performance_Throughput.scr
+
+Endpoint 1 Type       Endpoint 1 Value                             Endpoint 2 Type       Endpoint 2 Value
+--------------------- -------------------------------------------- --------------------- --------------------------------------------
+E1 Version            6.0                                          E2 Version            6.0
+E1 Build Level        068                                          E2 Build Level        068
+E1 Product Type       Retail (Web-Based)                           E2 Product Type       Retail (Web-Based)
+E1 Operating System   Windows XP 64-bit on AMD64 (32-bit endpoint) E2 Operating System   Windows XP 64-bit on AMD64 (32-bit endpoint)
+E1 CPU Utilization    Supported                                    E2 CPU Utilization    Supported
+OS Version (major)    6                                            OS Version (major)    6
+OS Version (minor)    1                                            OS Version (minor)    1
+OS Build Number       7601                                         OS Build Number       7601
+CSD Version           Service Pack 1                               CSD Version           Service Pack 1
+Memory                8188708 (KB)                                 Memory                16655188 (KB)
+TCP Default Send Size 32767                                        TCP Default Send Size 32767
+UDP Default Send Size 8183                                         UDP Default Send Size 8183
+RTP Default Send Size 8180                                         RTP Default Send Size 8180
+
+
+Timing Records
+
+192.168.1.123 to 192.168.1.111 running TCP, using
+High_Performance_Throughput.scr
+
+Timing Elapsed Measured Inactive             Trans. Response
+Record    Time     Time     Time Throughput    Rate     Time
+Number   (sec)    (sec)    (sec)     (Mbps) (#/sec)    (sec)
+------ ------- -------- -------- ---------- ------- --------
+     1   0.345    0.343             233.236   2.915    0.343
+     2   0.911    0.566             141.343   1.767    0.566
+     3   1.482    0.571             140.105   1.751    0.571
+     4   2.057    0.574             139.373   1.742    0.574
+     5   2.622    0.565             141.593   1.770    0.565
+     6   3.197    0.574             139.373   1.742    0.574
+     7   3.759    0.562             142.349   1.779    0.562
+     8   4.325    0.565             141.593   1.770    0.565
+     9   4.899    0.573             139.616   1.745    0.573
+    10   5.468    0.569             140.598   1.757    0.569
+    11   6.040    0.571             140.105   1.751    0.571
+    12   6.611    0.571             140.105   1.751    0.571
+    13   7.188    0.576             138.889   1.736    0.576
+    14   7.767    0.578             138.408   1.730    0.578
+    15   8.342    0.575             139.130   1.739    0.575
+    16   8.914    0.572             139.860   1.748    0.572
+    17   9.488    0.574             139.373   1.742    0.574
+    18  10.064    0.575             139.130   1.739    0.575
+    19  10.642    0.577             138.648   1.733    0.577
+    20  11.220    0.577             138.648   1.733    0.577
+    21  11.796    0.576             138.889   1.736    0.576
+    22  12.376    0.579             138.169   1.727    0.579
+    23  12.952    0.576             138.889   1.736    0.576
+    24  13.525    0.573             139.616   1.745    0.573
+    25  13.755    0.230             347.826   4.348    0.230
+    26  13.970    0.214             373.832   4.673    0.214
+    27  14.185    0.214             373.832   4.673    0.214
+    28  14.399    0.214             373.832   4.673    0.214
+    29  14.613    0.213             375.587   4.695    0.213
+    30  14.828    0.215             372.093   4.651    0.215
+    31  15.043    0.214             373.832   4.673    0.214
+    32  15.258    0.215             372.093   4.651    0.215
+    33  15.472    0.213             375.587   4.695    0.213
+    34  15.685    0.213             375.587   4.695    0.213
+    35  15.904    0.218             366.973   4.587    0.218
+    36  16.170    0.265             301.887   3.774    0.265
+    37  16.444    0.274             291.971   3.650    0.274
+    38  16.720    0.275             290.909   3.636    0.275
+    39  16.996    0.276             289.855   3.623    0.276
+    40  17.273    0.276             289.855   3.623    0.276
+    41  17.548    0.274             291.971   3.650    0.274
+    42  17.825    0.276             289.855   3.623    0.276
+    43  18.102    0.276             289.855   3.623    0.276
+    44  18.378    0.276             289.855   3.623    0.276
+    45  18.651    0.272             294.118   3.676    0.272
+    46  18.929    0.277             288.809   3.610    0.277
+    47  19.209    0.279             286.738   3.584    0.279
+    48  19.485    0.276             289.855   3.623    0.276
+    49  19.762    0.276             289.855   3.623    0.276
+_______________________________________________________________________________
+
+
+GROUP: ALL PAIRS / PAIR: 3
+
+Endpoint 1                          192.168.1.123
+Endpoint 2                          192.168.1.111
+Network Protocol                    TCP
+Service Quality
+Script/Stream Name                  High_Performance_Throughput.scr
+Pair Comment
+Console Knows Endpoint 1            192.168.1.123
+Console Protocol                    TCP
+Console Service Quality             n/a
+Endpoint 1 Knows Endpoint 2 (Setup) 192.168.1.111
+Endpoint 2 Setup Protocol           TCP
+
+
+Script
+High_Performance_Throughput.scr, version 6.40 -- High Performance Throughput
+
+Endpoint 1                     Endpoint 2
+------------------------------ -------------------------------
+SLEEP
+  initial_delay=0
+CONNECT_INITIATE               CONNECT_ACCEPT
+  source_port=AUTO               destination_port=AUTO
+  0                              0
+  0                              0
+LOOP                           LOOP
+  number_of_timing_records=100   number_of_timing_records=100
+  START_TIMER
+  LOOP                           LOOP
+    transactions_per_record=1      transactions_per_record=1
+    SEND                           RECEIVE
+      file_size=10000000             file_size=10000000
+      send_buffer_size=65535         receive_buffer_size=65535
+      send_datatype=NOCOMPRESS
+      send_data_rate=UNLIMITED
+    CONFIRM_REQUEST                CONFIRM_ACKNOWLEDGE
+    INCREMENT_TRANSACTION
+  END_LOOP                       END_LOOP
+  END_TIMER
+  SLEEP
+    transaction_delay=0
+END_LOOP                       END_LOOP
+DISCONNECT                     DISCONNECT
+  close_type=Reset               close_type=Reset
+
+
+Variable Name                 Value Description
+------------------------ ---------- --------------------------------------
+initial_delay                     0 Pause before the first transaction
+number_of_timing_records        100 How many timing records to generate
+transactions_per_record           1 Transactions per timing record
+file_size                  10000000 How many bytes in the transferred file
+send_buffer_size              65535 How many bytes of data in each SEND
+receive_buffer_size           65535 How many bytes of data in each RECEIVE
+transaction_delay                 0 Milliseconds to pause
+send_datatype            NOCOMPRESS What type of data to send
+send_data_rate            UNLIMITED How fast to send data
+destination_port               AUTO What port to use for Endpoint 2
+close_type                    Reset How connections are terminated
+source_port                    AUTO What port to use for Endpoint 1
+
+
+Endpoint Configuration Details
+
+192.168.1.123 to 192.168.1.111 running TCP, using
+High_Performance_Throughput.scr
+
+Endpoint 1 Type       Endpoint 1 Value                             Endpoint 2 Type       Endpoint 2 Value
+--------------------- -------------------------------------------- --------------------- --------------------------------------------
+E1 Version            6.0                                          E2 Version            6.0
+E1 Build Level        068                                          E2 Build Level        068
+E1 Product Type       Retail (Web-Based)                           E2 Product Type       Retail (Web-Based)
+E1 Operating System   Windows XP 64-bit on AMD64 (32-bit endpoint) E2 Operating System   Windows XP 64-bit on AMD64 (32-bit endpoint)
+E1 CPU Utilization    Supported                                    E2 CPU Utilization    Supported
+OS Version (major)    6                                            OS Version (major)    6
+OS Version (minor)    1                                            OS Version (minor)    1
+OS Build Number       7601                                         OS Build Number       7601
+CSD Version           Service Pack 1                               CSD Version           Service Pack 1
+Memory                8188708 (KB)                                 Memory                16655188 (KB)
+TCP Default Send Size 32767                                        TCP Default Send Size 32767
+UDP Default Send Size 8183                                         UDP Default Send Size 8183
+RTP Default Send Size 8180                                         RTP Default Send Size 8180
+
+
+Timing Records
+
+192.168.1.123 to 192.168.1.111 running TCP, using
+High_Performance_Throughput.scr
+
+Timing Elapsed Measured Inactive             Trans. Response
+Record    Time     Time     Time Throughput    Rate     Time
+Number   (sec)    (sec)    (sec)     (Mbps) (#/sec)    (sec)
+------ ------- -------- -------- ---------- ------- --------
+     1   0.331    0.330             242.424   3.030    0.330
+     2   0.880    0.548             145.985   1.825    0.548
+     3   1.451    0.570             140.351   1.754    0.570
+     4   2.023    0.572             139.860   1.748    0.572
+     5   2.594    0.571             140.105   1.751    0.571
+     6   3.165    0.570             140.351   1.754    0.570
+     7   3.732    0.567             141.093   1.764    0.567
+     8   4.304    0.571             140.105   1.751    0.571
+     9   4.861    0.557             143.627   1.795    0.557
+    10   5.418    0.557             143.627   1.795    0.557
+    11   5.974    0.556             143.885   1.799    0.556
+    12   6.523    0.548             145.985   1.825    0.548
+    13   7.081    0.558             143.369   1.792    0.558
+    14   7.643    0.561             142.603   1.783    0.561
+    15   8.201    0.558             143.369   1.792    0.558
+    16   8.764    0.563             142.096   1.776    0.563
+    17   9.324    0.559             143.113   1.789    0.559
+    18   9.888    0.563             142.096   1.776    0.563
+    19  10.447    0.559             143.113   1.789    0.559
+    20  11.001    0.553             144.665   1.808    0.553
+    21  11.561    0.560             142.857   1.786    0.560
+    22  12.120    0.559             143.113   1.789    0.559
+    23  12.676    0.555             144.144   1.802    0.555
+    24  13.240    0.563             142.096   1.776    0.563
+    25  13.901    0.661             121.029   1.513    0.661
+    26  14.692    0.791             101.138   1.264    0.791
+    27  15.481    0.788             101.523   1.269    0.788
+    28  16.372    0.890              89.888   1.124    0.890
+    29  17.393    1.021              78.355   0.979    1.021
+    30  18.422    1.028              77.821   0.973    1.028
+    31  19.446    1.023              78.201   0.978    1.023
+_______________________________________________________________________________
+
+
+GROUP: ALL PAIRS / PAIR: 4
+
+Endpoint 1                          192.168.1.123
+Endpoint 2                          192.168.1.111
+Network Protocol                    TCP
+Service Quality
+Script/Stream Name                  High_Performance_Throughput.scr
+Pair Comment
+Console Knows Endpoint 1            192.168.1.123
+Console Protocol                    TCP
+Console Service Quality             n/a
+Endpoint 1 Knows Endpoint 2 (Setup) 192.168.1.111
+Endpoint 2 Setup Protocol           TCP
+
+
+Script
+High_Performance_Throughput.scr, version 6.40 -- High Performance Throughput
+
+Endpoint 1                     Endpoint 2
+------------------------------ -------------------------------
+SLEEP
+  initial_delay=0
+CONNECT_INITIATE               CONNECT_ACCEPT
+  source_port=AUTO               destination_port=AUTO
+  0                              0
+  0                              0
+LOOP                           LOOP
+  number_of_timing_records=100   number_of_timing_records=100
+  START_TIMER
+  LOOP                           LOOP
+    transactions_per_record=1      transactions_per_record=1
+    SEND                           RECEIVE
+      file_size=10000000             file_size=10000000
+      send_buffer_size=65535         receive_buffer_size=65535
+      send_datatype=NOCOMPRESS
+      send_data_rate=UNLIMITED
+    CONFIRM_REQUEST                CONFIRM_ACKNOWLEDGE
+    INCREMENT_TRANSACTION
+  END_LOOP                       END_LOOP
+  END_TIMER
+  SLEEP
+    transaction_delay=0
+END_LOOP                       END_LOOP
+DISCONNECT                     DISCONNECT
+  close_type=Reset               close_type=Reset
+
+
+Variable Name                 Value Description
+------------------------ ---------- --------------------------------------
+initial_delay                     0 Pause before the first transaction
+number_of_timing_records        100 How many timing records to generate
+transactions_per_record           1 Transactions per timing record
+file_size                  10000000 How many bytes in the transferred file
+send_buffer_size              65535 How many bytes of data in each SEND
+receive_buffer_size           65535 How many bytes of data in each RECEIVE
+transaction_delay                 0 Milliseconds to pause
+send_datatype            NOCOMPRESS What type of data to send
+send_data_rate            UNLIMITED How fast to send data
+destination_port               AUTO What port to use for Endpoint 2
+close_type                    Reset How connections are terminated
+source_port                    AUTO What port to use for Endpoint 1
+
+
+Endpoint Configuration Details
+
+192.168.1.123 to 192.168.1.111 running TCP, using
+High_Performance_Throughput.scr
+
+Endpoint 1 Type       Endpoint 1 Value                             Endpoint 2 Type       Endpoint 2 Value
+--------------------- -------------------------------------------- --------------------- --------------------------------------------
+E1 Version            6.0                                          E2 Version            6.0
+E1 Build Level        068                                          E2 Build Level        068
+E1 Product Type       Retail (Web-Based)                           E2 Product Type       Retail (Web-Based)
+E1 Operating System   Windows XP 64-bit on AMD64 (32-bit endpoint) E2 Operating System   Windows XP 64-bit on AMD64 (32-bit endpoint)
+E1 CPU Utilization    Supported                                    E2 CPU Utilization    Supported
+OS Version (major)    6                                            OS Version (major)    6
+OS Version (minor)    1                                            OS Version (minor)    1
+OS Build Number       7601                                         OS Build Number       7601
+CSD Version           Service Pack 1                               CSD Version           Service Pack 1
+Memory                8188708 (KB)                                 Memory                16655188 (KB)
+TCP Default Send Size 32767                                        TCP Default Send Size 32767
+UDP Default Send Size 8183                                         UDP Default Send Size 8183
+RTP Default Send Size 8180                                         RTP Default Send Size 8180
+
+
+Timing Records
+
+192.168.1.123 to 192.168.1.111 running TCP, using
+High_Performance_Throughput.scr
+
+Timing Elapsed Measured Inactive             Trans. Response
+Record    Time     Time     Time Throughput    Rate     Time
+Number   (sec)    (sec)    (sec)     (Mbps) (#/sec)    (sec)
+------ ------- -------- -------- ---------- ------- --------
+     1   0.340    0.340             235.294   2.941    0.340
+     2   0.907    0.566             141.343   1.767    0.566
+     3   1.486    0.578             138.408   1.730    0.578
+     4   2.061    0.575             139.130   1.739    0.575
+     5   2.635    0.574             139.373   1.742    0.574
+     6   3.213    0.577             138.648   1.733    0.577
+     7   3.782    0.569             140.598   1.757    0.569
+     8   4.356    0.573             139.616   1.745    0.573
+     9   4.927    0.570             140.351   1.754    0.570
+    10   5.497    0.569             140.598   1.757    0.569
+    11   6.065    0.568             140.845   1.761    0.568
+    12   6.632    0.567             141.093   1.764    0.567
+    13   7.210    0.577             138.648   1.733    0.577
+    14   7.785    0.575             139.130   1.739    0.575
+    15   8.361    0.576             138.889   1.736    0.576
+    16   8.933    0.571             140.105   1.751    0.571
+    17   9.507    0.573             139.616   1.745    0.573
+    18  10.080    0.573             139.616   1.745    0.573
+    19  10.655    0.575             139.130   1.739    0.575
+    20  11.229    0.574             139.373   1.742    0.574
+    21  11.804    0.574             139.373   1.742    0.574
+    22  12.376    0.571             140.105   1.751    0.571
+    23  12.952    0.576             138.889   1.736    0.576
+    24  13.525    0.573             139.616   1.745    0.573
+    25  14.318    0.792             101.010   1.263    0.792
+    26  15.111    0.793             100.883   1.261    0.793
+    27  15.908    0.796             100.503   1.256    0.796
+    28  16.206    0.298             268.456   3.356    0.298
+    29  16.484    0.277             288.809   3.610    0.277
+    30  16.759    0.275             290.909   3.636    0.275
+    31  17.036    0.277             288.809   3.610    0.277
+    32  17.314    0.277             288.809   3.610    0.277
+    33  17.590    0.276             289.855   3.623    0.276
+    34  17.866    0.275             290.909   3.636    0.275
+    35  18.143    0.277             288.809   3.610    0.277
+    36  18.421    0.278             287.770   3.597    0.278
+    37  18.699    0.277             288.809   3.610    0.277
+    38  18.976    0.277             288.809   3.610    0.277
+    39  19.252    0.275             290.909   3.636    0.275
+    40  19.527    0.274             291.971   3.650    0.274
+    41  19.804    0.277             288.809   3.610    0.277

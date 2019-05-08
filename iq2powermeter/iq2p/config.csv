@@ -1,0 +1,7 @@
+IQ_IP,192.168.100.254
+IQ_ROUT,1
+IQ_PORT,1A
+PowerMeter_IP,192.168.100.222
+IQ_VSG_POWER,-10
+Cal_Frequency,2500
+delay_time,20

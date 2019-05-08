@@ -1,0 +1,281 @@
+cat .//proc//wlan0//mib_rf |grep chipVersion
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+flash get HW_WLAN0_TX_POWER_TSSI_5G_HT40_1S_A
+flash read
+flash get HW_WLAN0_TX_POWER_TSSI_5G_HT40_1S_B
+flash read
+iwpriv wlan0 set_mib pwrlevel_TSSI5GHT40_1S_A=0000000000000000000000000000000000000000000000000000000000000000000000040404040400000000000000000606060606060606fefefefefefefefe080808080808080808080808080808080808080808080808080808080808080808080808080808080909090909090909080808080808080804040404040404040a0a0a0a0a0a0a0a08080808080808080909090909090909090c0c0c0c0c0c0c0c10101010101010100b0b0b0b0b0b0b0b00000000000000000000000000000000000000
+iwpriv wlan0 set_mib pwrlevel_TSSI5GHT40_1S_B=0000000000000000000000000000000000000000000000000000000000000000000000090909090906060606060606060d0d0d0d0d0d0d0d0606060606060606101010101010101010101010101010101010101010101010101010101010101010101010101010100a0a0a0a0a0a0a0a101010101010101010101010101010100d0d0d0d0d0d0d0d0f0f0f0f0f0f0f0f1212121212121212120d0d0d0d0d0d0d0d1212121212121212111111111111111100000000000000000000000000000000000000
+ifconfig wlan0 down
+ifconfig wlan0 up
+iwpriv wlan0 mp_start
+cat .//proc//wlan1//mib_rf |grep chipVersion
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+flash get HW_WLAN0_TX_POWER_TSSI_5G_HT40_1S_A
+flash read
+flash get HW_WLAN0_TX_POWER_TSSI_5G_HT40_1S_B
+flash read
+iwpriv wlan0 set_mib pwrlevel_TSSI5GHT40_1S_A=0000000000000000000000000000000000000000000000000000000000000000000000040404040400000000000000000606060606060606fefefefefefefefe080808080808080808080808080808080808080808080808080808080808080808080808080808080909090909090909080808080808080804040404040404040a0a0a0a0a0a0a0a08080808080808080909090909090909090c0c0c0c0c0c0c0c10101010101010100b0b0b0b0b0b0b0b00000000000000000000000000000000000000
+iwpriv wlan0 set_mib pwrlevel_TSSI5GHT40_1S_B=0000000000000000000000000000000000000000000000000000000000000000000000090909090906060606060606060d0d0d0d0d0d0d0d0606060606060606101010101010101010101010101010101010101010101010101010101010101010101010101010100a0a0a0a0a0a0a0a101010101010101010101010101010100d0d0d0d0d0d0d0d0f0f0f0f0f0f0f0f1212121212121212120d0d0d0d0d0d0d0d1212121212121212111111111111111100000000000000000000000000000000000000
+ifconfig wlan0 down
+ifconfig wlan0 up
+iwpriv wlan0 mp_start
+cat .//proc//wlan0//mib_rf |grep MIMO_TR_hw_support
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+cat .//proc//wlan0//mib_rf |grep Antdiv_Type
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 set_mib macPhyMode=0
+iwpriv wlan1 set_mib macPhyMode=0
+iwpriv wlan0 set_mib mp_specific=1
+iwpriv wlan0 set_mib phyBandSelect=2
+iwpriv wlan1 set_mib mp_specific=1
+iwpriv wlan1 set_mib phyBandSelect=2
+ifconfig wlan0 down
+ifconfig wlan0 up
+iwpriv wlan0 mp_start
+ifconfig wlan1 down
+ifconfig wlan1 up
+iwpriv wlan1 mp_start
+iwpriv wlan0 mp_version >//tmp//MP.txt
+flash read
+flash read
+iwpriv wlan0 mp_bandwidth 40M=0,shortGI=0,txsc=0
+iwpriv wlan0 mp_channel 36,channel2=-1,syn=0
+iwpriv wlan0 mp_txpower patha=11,pathb=11
+iwpriv wlan0 mp_version >//tmp//MP.txt
+flash read
+flash read
+cat .//proc//wlan0//mib_rf |grep rfe_type
+***********************************
+** Error! MP Command(cat/flash get) ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 mp_txpower patha=11,pathb=11
+iwpriv wlan0 mp_ant_tx a
+iwpriv wlan0 mp_txpower patha=33,pathb=11
+iwpriv wlan0 mp_txpower patha=33,pathb=30
+iwpriv wlan0 mp_rate 135
+iwpriv wlan0 mp_txpower patha=33,pathb=30
+iwpriv wlan0 mp_phypara xcap=64
+ifconfig wlan0 up
+iwpriv wlan0 mp_reset_stats
+iwpriv wlan0 mp_reset_rx
+iwpriv wlan0 mp_reset_rx
+iwpriv wlan0 mp_rate 135
+iwpriv wlan0 mp_bandwidth 40M=0,shortGI=0,txsc=0
+iwpriv wlan0 mp_channel 36
+iwpriv wlan0 mp_txpower patha=33,pathb=30,pathc=11,pathd=11
+iwpriv wlan0 mp_ant_tx a
+iwpriv wlan0 mp_ctx len=1000,background,pkt
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 read_reg dw,1834
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 mp_query
+
+data:wlan0     read_reg:0  0  0  0  
+iwpriv wlan0 mp_query
+***********************************
+** Error! MP Command(mp_query) ACK failed. **
+***********************************
+***********************************
+** Error! MP Command(flash read) ACK failed. **
+***********************************
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 read_reg dw,1834
+flash read
+iwpriv wlan0 read_de
+iwpriv wlan0 mp_query
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 read_de
+***********************************
+** Error! MP Command ACK failed. **
+***********************************
+flash read
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_ctx stop
+iwpriv wlan0 mp_query
+iwpriv wlan0 mp_stop
+ifconfig wlan0 down
+ifconfig wlan1 down
+ifconfig wlan0 up

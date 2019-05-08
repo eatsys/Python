@@ -1,0 +1,2 @@
+module: " VSG1",code: "-200",description: " CHAN1;  WAVE:EXEC ON WSEG1;  Attempting to play wlist without saving parameters"
+module: " VSG1",code: "222",description: " CHAN1;  WLIST:WSEG1:SAVE;  WLIST:WSEG:START + WLIST:WSEG:LENGTH is greater than waveform length or WLIST:WSEG:START is not multiple of 8"

@@ -1,0 +1,16 @@
+DUT_IP,192.168.8.1
+username,root
+password,
+addition1,UDPserver &
+addition2,
+addition3,
+addition4,
+log_enable,1
+sleep_time,0.2
+IQ_IP,192.168.100.254
+IQ_Port,1
+IQ_Rout,1
+RX_Packets,100
+Super_Mode,1
+2G_ID,0
+5G_ID,1
