@@ -30,6 +30,7 @@ class sta_rssi():
             except Exception as err:
                 logging.error('Connect fail', err)
             else:
+                
                 tn.read_until(b'#')
                 if self.radio == '2.4g':
                     tn.write(b'iwconfig ath0')
