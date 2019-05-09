@@ -13,8 +13,8 @@ ___Create some automated test script or tool___
 2. cal_pathloss  
 3. dut  
 4. hi  
-* hi_cal  
-* hi_tx
+  * hi_cal  
+  * hi_tx
 5. iq_cal  
 6. iq2powermeter  
 7. RSSI  
