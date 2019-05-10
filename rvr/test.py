@@ -108,22 +108,24 @@ __author__ = 'Ethan'
 #        print(n, '不是质数')#
 
 #Geometric series
-while 1:
-    a = input('Input a Integer:')
-    if a.isdigit() is False:
-        print('Please input a Integer')
-        break
-    r = input('Input a Constant:')
-    try:
-        r = float(r)
-    except Exception as err:
-        print('Please input a number')
-        break
-    n = input('Input the power:')
-    try:
-        n = float(n)
-    except Exception as err:
-        print('Please input a number')
-        break
-    gs_sum = int(a)*(float(r)**float(n)-1)/(float(r)-1)
-    print('The Sum is', gs_sum)
+#while 1:
+#    a = input('Input a Integer:')
+#    if a.isdigit() is False:
+#        print('Please input a Integer')
+#        break
+#    r = input('Input a Constant:')
+#    try:
+#        r = float(r)
+#    except Exception as err:
+#        print('Please input a number')
+#        break
+#    n = input('Input the power:')
+#    try:
+#        n = float(n)
+#    except Exception as err:
+#        print('Please input a number')
+#        break
+#    gs_sum = int(a)*(float(r)**float(n)-1)/(float(r)-1)
+#    print('The Sum is', gs_sum)
+
+
