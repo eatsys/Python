@@ -5,10 +5,12 @@
 
 # import serial
 #
-# class PDV():
+#
+# class PDV:
 #     def __init__(self, port):
 #         self.port = port
 #         self.instance = serial.Serial(port=self.port, baudrate=57600, bytesize=8, stopbits=1, timeout=2)
+#         self.instance.timeout = 0.5
 #         #print(self.instance.name, self.instance.port)
 #
 #     def send_cmd(self, cmd):
@@ -61,55 +63,54 @@
 #
 #     pdv.close()
 
-#import os
-#main = "D:\work\Reamon\TP\OTA_RVR_TEST_TOOL\common\Emachine\Controller.exe"
-#r_v = os.system(main)
+# import os
+# main = "D:\work\Reamon\TP\OTA_RVR_TEST_TOOL\common\Emachine\Controller.exe"
+# r_v = os.system(main)
 
-#import subprocess
-#import os
-#main = "D:\work\Reamon\TP\OTA_RVR_TEST_TOOL\common\Emachine\Controller.exe"
-#if os.path.exists(main):
+# import subprocess
+# import os
+# main = "D:\work\Reamon\TP\OTA_RVR_TEST_TOOL\common\Emachine\Controller.exe"
+# if os.path.exists(main):
 #    rc,out= subprocess.getstatusoutput(main)
 #    print (rc)
 #    print ('*'*10)
 #
 
-#import os
-#main = "D:\work\Reamon\TP\OTA_RVR_TEST_TOOL\common\Emachine\Controller.exe"
-#f = os.popen(main)
-#data = f.readlines()
-#f.close()
+# import os
+# main = "D:\work\Reamon\TP\OTA_RVR_TEST_TOOL\common\Emachine\Controller.exe"
+# f = os.popen(main)
+# data = f.readlines()
+# f.close()
 
 import os
 import time
-import logging
 import win32com.client
 from ctypes import *
+import logging
 
-LOG_FORMAT = "%(asctime)s - %(pathname)s - %(levelname)s - %(message)s"
-DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
+logger = logging.getLogger()
 
-logging.basicConfig(filename='./log/log.txt', level=logging.INFO, format=LOG_FORMAT, datefmt=DATE_FORMAT)
 
 def Controller():
-    #pythoncom.CoInitialize()
+    # pythoncom.CoInitialize()
     WMI = win32com.client.GetObject('winmgmts:')
-    processCodeCov =WMI.ExecQuery('select * from Win32_Process where name ="Controller.exe"')
+    processCodeCov = WMI.ExecQuery('select * from Win32_Process where name ="Controller.exe"')
     if len(processCodeCov) > 0:
-        logging.info("PDV Controller.exe process has been existed,now killed them!")
+        logger.info("PDV Controller.exe process has been existed,now killed them!")
         os.system('TASKKILL /F /IM Controller.exe')
     try:
         os.chdir('./swiveltable')
         os.system('start Controller.exe')
     except:
-        logging.error("Open MotorControl.exe failed!")
+        logger.error("Open MotorControl.exe failed!")
     time.sleep(3)
-    for i in range(350, 500):
+    for i in range(300, 500):
         windll.user32.SetCursorPos(900, i)
         windll.user32.mouse_event(2, 0, 0, 0, 0)
+        time.sleep(0.01)
         windll.user32.mouse_event(4, 0, 0, 0, 0)
         windll.user32.SetCursorPos(800, i)
-    logging.info("Clockwise has been finished")
+    logger.info("Clockwise has been finished")
     os.system('TASKKILL /F /IM Controller.exe')
     os.chdir('..')
 

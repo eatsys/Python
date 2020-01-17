@@ -326,6 +326,7 @@ def get_BSSI():
                 BSSID = ':'.join('%02x' % b for b in network.dot11Bssid).upper()
                 signal_strength = str(network.lRssi)
                 link_rate = str(network.ulIeSize)
+                rates = str(network.)
                 #print(xxx)
                 #print("SSID: " + SSID + " BSSID: " + BSSID + " RSSI: "+signal_strength + ' LINK_RATE:' + link_rate)
 
@@ -339,7 +340,7 @@ def get_BSSI():
             WlanCloseHandle(ClientHandle, None)
     finally:
         WlanFreeMemory(pInterfaceList)
-    #print('XXX', BSSI_Values)
+    print('XXX', BSSI_Values)
     return BSSI_Values
 
 

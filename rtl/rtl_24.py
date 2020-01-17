@@ -1245,6 +1245,5 @@ if __name__ == '__main__':
                 with open('./Result/' + rx_result_name, 'a+', newline='') as f2:
                     writer2 = csv.writer(f2)
                     writer2.writerow([channel, rate, chain, sens, per, result])
-
     dt.close()
     iq.close()

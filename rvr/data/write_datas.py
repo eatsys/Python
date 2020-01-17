@@ -3,25 +3,15 @@
 __author__ = 'DVTRF'
 
 import os
-import shutil
+import logging
 from time import sleep
-from config import conf
-test_ap = conf.Ap_type_get()
+from data.parameters import AP_TYPE, RADIO
 retval = os.getcwd()
-#print('1111', retval)
-result_file = retval + '/Result/Data/ ' + test_ap + '/'
-#print('2222', result_file)
-isExists = os.path.exists(result_file)
-if not isExists:
-    # 如果不存在则创建目录
-    # 创建目录操作函数
-    os.makedirs(result_file)
-    print(result_file + ' 创建成功')
-else:
-    # 如果目录存在则不创建，并提示目录已存在
-    print(result_file + ' 目录已存在')
-    #shutil.rmtree(result_file)
-    #os.makedirs(result_file)
+result_file = retval + '/Result/Data/' + AP_TYPE + '_' + RADIO + '/'
+ixchraiot_file = retval + '/Result/IxChariotOD/' + AP_TYPE + '_' + RADIO + '/'
+
+logger = logging.getLogger()
+
 
 
 
@@ -138,6 +128,38 @@ def bw_rxrate_write(rxrate):
         sleep(1)
         bw_rxrate.write(str(rxrate))
         bw_rxrate.write("\n")
+
+
+def rssi_txant_write(txrssi):
+    sleep(1)
+    with open(result_file + "rssi_txant.txt", "a") as rssi_txant:
+        sleep(1)
+        rssi_txant.write(str(txrssi))
+        rssi_txant.write("\n")
+
+
+def power_txant_write(txpower):
+    sleep(1)
+    with open(result_file + "power_txant.txt", "a") as power_txant:
+        sleep(1)
+        power_txant.write(str(txpower))
+        power_txant.write("\n")
+
+
+def rssi_rxant_write(rxrssi):
+    sleep(1)
+    with open(result_file + "rssi_rxant.txt", "a") as rssi_rxant:
+        sleep(1)
+        rssi_rxant.write(str(rxrssi))
+        rssi_rxant.write("\n")
+
+
+def power_rxant_write(rxpower):
+    sleep(1)
+    with open(result_file + "power_rxant.txt", "a") as power_rxant:
+        sleep(1)
+        power_rxant.write(str(rxpower))
+        power_rxant.write("\n")
 
 
 if __name__ == '__main__':

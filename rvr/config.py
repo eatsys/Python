@@ -6,19 +6,36 @@ __author__ = 'DVTRF'
 
 
 import configparser
-#import logging
-#logging = logging.getlogging(__name__)
-#logging.setLevel(level=logging.INFO)
-# = logging.FileHandler("./log/log.txt")
-#handler.setLevel(logging.INFO)
-#formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-#handler.setFormatter(formatter)
-#logging.addHandler(handler)
+import time
 import logging
-LOG_FORMAT = "%(asctime)s - %(pathname)s - %(levelname)s - %(message)s"
-DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
 
-logging.basicConfig(filename='./log/log.txt', level=logging.INFO, format=LOG_FORMAT, datefmt=DATE_FORMAT)
+log_time = time.strftime("%Y%m%d%H%M%S", time.localtime())
+# create a logger
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)  # logger的总开关，只有大于Debug的日志才能被logger对象处理
+
+# 第二步，创建一个handler，用于写入日志文件
+file_handler = logging.FileHandler('./log/log_'+log_time+'.txt', mode='w')
+file_handler.setLevel(logging.DEBUG)  # 输出到file的log等级的开关
+# 创建该handler的formatter
+file_handler.setFormatter(
+        logging.Formatter(
+                fmt='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S')
+        )
+# 添加handler到logger中
+logger.addHandler(file_handler)
+
+# 第三步，创建一个handler，用于输出到控制台
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)  # 输出到控制台的log等级的开关
+# 创建该handler的formatter
+console_handler.setFormatter(
+        logging.Formatter(
+                fmt='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S')
+        )
+logger.addHandler(console_handler)
 
 config_file = "./config/config.ini"
 
@@ -31,167 +48,182 @@ class Config:
 
     def Ap_type_get(self):
         aptype = self.conf.get("ap_config", "ap_type")
-        logging.info("ap type is     : {0}".format(aptype))
+        logger.info(f'ap type is:{aptype}')
         return aptype
 
     def Dutip_get(self):
         dutip = self.conf.get("ap_config", "dut_ip")
-        logging.info("dut ip is     : {0}".format(dutip))
+        logger.info("dut ip is     : {0}".format(dutip))
         return dutip
 
     def Username_get(self):
         username = self.conf.get("ap_config", "username")
-        logging.info("user name is     : {0}".format(username))
+        logger.info("user name is     : {0}".format(username))
         return username
 
     def Password_get(self):
         password = self.conf.get("ap_config", "password")
-        logging.info("password is     : {0}".format(password))
+        logger.info("password is     : {0}".format(password))
         return password
 
     def SSID_get(self):
         ssid = self.conf.get("ap_config", "ssid")
-        logging.info("SSID is     : {0}".format(ssid))
+        logger.info("SSID is     : {0}".format(ssid))
         return ssid
 
     def Radio_get(self):
         radio = self.conf.get("ap_config", "radio")
-        logging.info("radio is     : {0}".format(radio))
+        logger.info("radio is     : {0}".format(radio))
         return radio
 
     def Channel_get(self):
         channel = self.conf.get("ap_config", "channel")
-        logging.info("channel is     : {0}".format(channel))
+        logger.info("channel is     : {0}".format(channel))
         return channel
 
-    def Atten_start_get(self):
-        atten_start = self.conf.get("atten_config", "atten_start")
-        logging.info("atten start    : {0}".format(atten_start))
-        return atten_start
+    def COM_get(self):
+        ap_com = self.conf.get("ap_config", "com")
+        logger.info("AP COM is     : {0}".format(ap_com))
+        return ap_com
 
-    def Atten_end_get(self):
-        atten_end = self.conf.get("atten_config", "atten_end")
-        logging.info("atten end     : {0}".format(atten_end))
-        return atten_end
-
-    def Atten_step_get(self):
-        atten_step = self.conf.get("atten_config", "atten_step")
-        logging.info("atten step is     : {0}".format(atten_step))
-        return atten_step
-
-    def External_loss_get(self):
-        external_loss = self.conf.get("atten_config", "external_loss")
-        logging.info("external loss is     : {0}".format(external_loss))
-        return external_loss
-
-    def Atten_num_get(self):
-        atten_num = self.conf.get("atten_config", "atten_num")
-        logging.info("atten number is     : {0}".format(atten_num))
-        return atten_num
-
-    def Atten_1_ip_get(self):
-        att_1_ip = self.conf.get("atten_config", "att_1_ip")
-        logging.info("atten 1 ip is     : {0}".format(att_1_ip))
-        return att_1_ip
-
-    def Atten_2_ip_get(self):
-        att_2_ip = self.conf.get("atten_config", "att_2_ip")
-        logging.info("atten 2 ip is     : {0}".format(att_2_ip))
-        return att_2_ip
-
-    def Atten_3_ip_get(self):
-        att_3_ip = self.conf.get("atten_config", "att_3_ip")
-        logging.info("atten 3 ip is     : {0}".format(att_3_ip))
-        return att_3_ip
-
-    def Atten_4_ip_get(self):
-        att_4_ip = self.conf.get("atten_config", "att_4_ip")
-        logging.info("atten 4 ip is     : {0}".format(att_4_ip))
-        return att_4_ip
-
-    def Atten_5_ip_get(self):
-        att_5_ip = self.conf.get("atten_config", "att_5_ip")
-        logging.info("atten 5 ip is     : {0}".format(att_5_ip))
-        return att_5_ip
-
-    def Atten_6_ip_get(self):
-        att_6_ip = self.conf.get("atten_config", "att_6_ip")
-        logging.info("atten 6 ip is     : {0}".format(att_6_ip))
-        return att_6_ip
-
-    def Atten_7_ip_get(self):
-        att_7_ip = self.conf.get("atten_config", "att_7_ip")
-        logging.info("atten 7 ip is     : {0}".format(att_7_ip))
-        return att_7_ip
-
-    def Atten_8_ip_get(self):
-        att_8_ip = self.conf.get("atten_config", "att_8_ip")
-        logging.info("atten 8 ip is     : {0}".format(att_8_ip))
-        return att_8_ip
-
-    def dura_time_get(self):
-        dura_time = self.conf.get("chariot_config", "duration")
-        logging.info("dura_time is     : {0}".format(dura_time))
-        return dura_time
-
-    def pc_ip_get(self):
-        pc_ip = self.conf.get("chariot_config", "pc_ip")
-        logging.info("sta ip is     : {0}".format(pc_ip))
-        return pc_ip
-
-    def Sta_ip_get(self):
-        sta_ip = self.conf.get("chariot_config", "sta_ip")
-        logging.info("sta ip is     : {0}".format(sta_ip))
-        return sta_ip
-
-    def Dura_time_get(self):
-        dura_time = self.conf.get("chariot_config", "duration")
-        # logging.info("duration time is    : {0}".format(dura_time))
-        return dura_time
-
-    def Curr_att_get(self):
-        curr_att = self.conf.get("chariot_config", "atten_value")
-        logging.info("current attention is    : {0}".format(curr_att))
-        return curr_att
-
-    def angle_num_get(self):
-        angle_num = self.conf.get("swivel_table_config", "angle_num")
-        logging.info(" Degree is     : {0}".format(angle_num))
-        return angle_num
-
-    def current_angle_get(self):
-        current_angle = self.conf.get("swivel_table_config", "current_angle")
-        logging.info(" Current_angle is     : {0}".format(current_angle))
-        return current_angle
-
-    def table_com_get(self):
-        com = self.conf.get("swivel_table_config", "com")
-        logging.info(" Table COM is     : {0}".format(com))
-        return com
+    def Baudrate_get(self):
+        ap_baudrate = self.conf.get("ap_config", "baudrate")
+        logger.info("AP Baudrate is     : {0}".format(ap_baudrate))
+        return ap_baudrate
 
     def Sta_type_get(self):
         sta_type = self.conf.get("sta_config", "sta_type")
-        logging.info("sta ip is     : {0}".format(sta_type))
+        logger.info("sta type is     : {0}".format(sta_type))
         return sta_type
 
     def Sta_address(self):
         sta_address = self.conf.get("sta_config", "sta_address")
-        logging.info("sta address is     : {0}".format(sta_address))
+        logger.info("sta address is     : {0}".format(sta_address))
         return sta_address
 
     def Sta_username(self):
         sta_username = self.conf.get("sta_config", "sta_username")
-        logging.info("sta username is     : {0}".format(sta_username))
+        logger.info("sta username is     : {0}".format(sta_username))
         return sta_username
 
     def Sta_password(self):
         sta_password = self.conf.get("sta_config", "sta_password")
-        logging.info("sta password is     : {0}".format(sta_password))
+        logger.info("sta password is     : {0}".format(sta_password))
         return sta_password
+
+    def Sta_switchip_get(self):
+        sta_switch_ip = self.conf.get("sta_config", "switch_ip")
+        logger.info("sta switch ip is     : {0}".format(sta_switch_ip))
+        return sta_switch_ip
+
+    def Sta_switchport_get(self):
+        sta_switch_port = self.conf.get("sta_config", "switch_port")
+        logger.info("sta switch port is     : {0}".format(sta_switch_port))
+        return sta_switch_port
+
+    def Atten_start_get(self):
+        atten_start = self.conf.get("atten_config", "atten_start")
+        logger.info("atten start    : {0}".format(atten_start))
+        return atten_start
+
+    def Atten_end_get(self):
+        atten_end = self.conf.get("atten_config", "atten_end")
+        logger.info("atten end     : {0}".format(atten_end))
+        return atten_end
+
+    def Atten_step_get(self):
+        atten_step = self.conf.get("atten_config", "atten_step")
+        logger.info("atten step is     : {0}".format(atten_step))
+        return atten_step
+
+    def External_loss_get(self):
+        external_loss = self.conf.get("atten_config", "external_loss")
+        logger.info("external loss is     : {0}".format(external_loss))
+        return external_loss
+
+    def Atten_num_get(self):
+        atten_num = self.conf.get("atten_config", "atten_num")
+        logger.info("atten number is     : {0}".format(atten_num))
+        return atten_num
+
+    def Atten_1_ip_get(self):
+        att_1_ip = self.conf.get("atten_config", "att_1_ip")
+        logger.info("atten 1 ip is     : {0}".format(att_1_ip))
+        return att_1_ip
+
+    def Atten_2_ip_get(self):
+        att_2_ip = self.conf.get("atten_config", "att_2_ip")
+        logger.info("atten 2 ip is     : {0}".format(att_2_ip))
+        return att_2_ip
+
+    def Atten_3_ip_get(self):
+        att_3_ip = self.conf.get("atten_config", "att_3_ip")
+        logger.info("atten 3 ip is     : {0}".format(att_3_ip))
+        return att_3_ip
+
+    def Atten_4_ip_get(self):
+        att_4_ip = self.conf.get("atten_config", "att_4_ip")
+        logger.info("atten 4 ip is     : {0}".format(att_4_ip))
+        return att_4_ip
+
+    def Atten_5_ip_get(self):
+        att_5_ip = self.conf.get("atten_config", "att_5_ip")
+        logger.info("atten 5 ip is     : {0}".format(att_5_ip))
+        return att_5_ip
+
+    def Atten_6_ip_get(self):
+        att_6_ip = self.conf.get("atten_config", "att_6_ip")
+        logger.info("atten 6 ip is     : {0}".format(att_6_ip))
+        return att_6_ip
+
+    def Atten_7_ip_get(self):
+        att_7_ip = self.conf.get("atten_config", "att_7_ip")
+        logger.info("atten 7 ip is     : {0}".format(att_7_ip))
+        return att_7_ip
+
+    def Atten_8_ip_get(self):
+        att_8_ip = self.conf.get("atten_config", "att_8_ip")
+        logger.info("atten 8 ip is     : {0}".format(att_8_ip))
+        return att_8_ip
+
+    def dura_time_get(self):
+        dura_time = self.conf.get("chariot_config", "duration")
+        logger.info("dura_time is     : {0}".format(dura_time))
+        return dura_time
+
+    def pc_ip_get(self):
+        pc_ip = self.conf.get("chariot_config", "pc_ip")
+        logger.info("PC ip is     : {0}".format(pc_ip))
+        return pc_ip
+
+    def Dura_time_get(self):
+        dura_time = self.conf.get("chariot_config", "duration")
+        logger.info("duration time is    : {0}".format(dura_time))
+        return dura_time
+
+    def Curr_att_get(self):
+        curr_att = self.conf.get("chariot_config", "atten_value")
+        logger.info("current attention is    : {0}".format(curr_att))
+        return curr_att
+
+    def angle_num_get(self):
+        angle_num = self.conf.get("swivel_table_config", "angle_num")
+        logger.info("Degree is     : {0}".format(angle_num))
+        return angle_num
+
+    def current_angle_get(self):
+        current_angle = self.conf.get("swivel_table_config", "current_angle")
+        logger.info("Current_angle is     : {0}".format(current_angle))
+        return current_angle
+
+    def table_com_get(self):
+        table_com = self.conf.get("swivel_table_config", "com")
+        logger.info("Table COM is     : {0}".format(table_com))
+        return table_com
 
     def Run_type_get(self):
         run_type = self.conf.get("test_config", "test_type")
-        # logging.info("duration time is    : {0}".format(dura_time))
+        logger.info("Run type is    : {0}".format(run_type))
         return run_type
 
 
@@ -264,7 +296,7 @@ class Con_current_atten:
 
     def read_atten(self):
         current_atten = self.conf.get("chariot_config", "atten_value")
-        logging.info("now the attention is   : {0}".format(current_atten))
+        logger.info("now the attention is   : {0}".format(current_atten))
         return current_atten
 
     def write_atten(self):
@@ -280,10 +312,10 @@ class Con_current_angle:
         self.conf.read(config_file)
 
     def read_current_angle(self):
-        print('111', self.angle)
+        #print('111', self.angle)
         angle = self.conf.get("swivel_table_config", "current_angle")
-        print('222', angle)
-        logging.info("now the angle is   : {0}".format(angle))
+        #print('222', angle)
+        logger.info("now the angle is   : {0}".format(angle))
         return angle
 
     def write_angle(self):
@@ -328,6 +360,7 @@ class Run_type_config(object):
 
 
 conf = Config()
+
 
 if __name__ == "__main__":
     #pass##

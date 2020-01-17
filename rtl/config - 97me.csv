@@ -10,7 +10,7 @@ sleep_time,0.2
 IQ_IP,192.168.100.254
 IQ_Port,1
 IQ_Rout,1
-RX_Packets,100
-Super_Mode,0
+RX_Packets,300
+Super_Mode,1
 2G_ID,0
 5G_ID,1

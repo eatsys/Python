@@ -1,1 +1,3 @@
-pyinstaller -F tx_target_test.py --upx D:\work\Reamon\Python\upx -i D:\work\Reamon\Python\64.ico
+pyinstaller --clean --win-private-assemblies -F -p D:\work\Reamon\Python\hi\hi_tx\EATS_Hi_v1\venv\Lib\site-packages rssi.py --upx D:\work\Reamon\Python\upx -i D:\work\Reamon\Python\64.ico
+
+pyinstaller -D main.spec

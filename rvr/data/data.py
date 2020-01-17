@@ -1,13 +1,9 @@
 __author__ = 'DVTRF'
 
 import os
-from config import conf
+from data.parameters import AP_TYPE, RADIO
 import logging
-
-LOG_FORMAT = "%(asctime)s - %(pathname)s - %(levelname)s - %(message)s"
-DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
-
-logging.basicConfig(filename='./log/log.txt', level=logging.INFO, format=LOG_FORMAT, datefmt=DATE_FORMAT)
+logger = logging.getLogger()
 
 Att_rep = []
 Channel = []
@@ -25,6 +21,10 @@ NSS_Tx_Rate = []
 NSS_Rx_Rate = []
 BW_Tx_Rate = []
 BW_Rx_Rate = []
+TX_RSSI_ANT = []
+TX_POWER_ANT = []
+RX_RSSI_ANT = []
+RX_POWER_ANT = []
 
 """
 此部分是生成报告时用到的，主要功能是将.txt文件里的数据转换成相应的list，
@@ -32,25 +32,8 @@ BW_Rx_Rate = []
 
 在生成报告之前，要首先执行此部分脚本
 """
-## os.chdir(file_d)
-##retval = os.getcwd()
-##print('111', retval)
-##os.chdir('..')
-##os.chdir('./config')
-##AP_TYPE = conf.Ap_type_get()
-##print(AP_TYPE)
-#AP_TYPE = 'WF-1931'
-#retval = os.getcwd()
-##print('222', retval)
-#result_file = retval + '/Result/Data/' + AP_TYPE + '/'
-##print('333', result_file)
-#os.chdir('..')
 retval = os.getcwd()
-#print('DATA PATH', retval)
-AP_TYPE = conf.Ap_type_get()
-#AP_TYPE = ' WF-1931'
-result_file = retval + '/Result/Data/ ' + AP_TYPE + '/'
-#print('DATA FILE:', result_file)
+result_file = retval + '/Result/Data/' + AP_TYPE + '_' + RADIO + '/'
 
 
 class Reportdata_Get(object):
@@ -64,16 +47,16 @@ class Reportdata_Get(object):
         try:
             ch = open(ch_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for channel in ch:
                 L.append(channel)
             for i in range(len(L)):
-                Channel.append(int(L[i].strip().encode('utf-8')))
+                Channel.append(L[i].strip())
             return Channel
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             ch.close()
 
@@ -84,7 +67,7 @@ class Reportdata_Get(object):
         try:
             att = open(att_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for attention in att:
@@ -93,7 +76,7 @@ class Reportdata_Get(object):
                 Att_rep.append(int(L[i].strip().encode('utf-8')))
             return Att_rep
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             att.close()
 
@@ -104,7 +87,7 @@ class Reportdata_Get(object):
         try:
             angle = open(angle_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for ag in angle:
@@ -114,7 +97,7 @@ class Reportdata_Get(object):
                 #print('Angle list', Angle)
             return Angle
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             angle.close()
 
@@ -125,7 +108,7 @@ class Reportdata_Get(object):
         try:
             tx_tp = open(tx_tp_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for txthought in tx_tp:
@@ -134,7 +117,7 @@ class Reportdata_Get(object):
                 Tx_Throught.append(L[i].strip().encode('utf-8'))
             return Tx_Throught
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             tx_tp.close()
 
@@ -146,7 +129,7 @@ class Reportdata_Get(object):
             rx_tp = open(rx_tp_path)
             #print(rx_tp)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for rxthought in rx_tp:
@@ -157,7 +140,7 @@ class Reportdata_Get(object):
             #print(Rx_Throught)
             return Rx_Throught
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             rx_tp.close()
 
@@ -168,7 +151,7 @@ class Reportdata_Get(object):
         try:
             sta_rssi = open(sta_rssi_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for starssi in sta_rssi:
@@ -177,7 +160,7 @@ class Reportdata_Get(object):
                 Sta_Rssi.append(L[i].strip())
             return Sta_Rssi
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             sta_rssi.close()
 
@@ -188,7 +171,7 @@ class Reportdata_Get(object):
         try:
             ap_rssi = open(ap_rssi_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for aprssi in ap_rssi:
@@ -198,7 +181,7 @@ class Reportdata_Get(object):
                 #print(Ap_Rssi)
             return Ap_Rssi
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             ap_rssi.close()
 
@@ -209,7 +192,7 @@ class Reportdata_Get(object):
         try:
             tx_rate = open(tx_rate_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for txrate in tx_rate:
@@ -218,7 +201,7 @@ class Reportdata_Get(object):
                 Tx_Rate.append(L[i].strip())
             return Tx_Rate
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             tx_rate.close()
 
@@ -229,7 +212,7 @@ class Reportdata_Get(object):
         try:
             rx_rate = open(rx_rate_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for rxrate in rx_rate:
@@ -238,7 +221,7 @@ class Reportdata_Get(object):
                 Rx_Rate.append(L[i].strip())
             return Rx_Rate
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             rx_rate.close()
 
@@ -249,7 +232,7 @@ class Reportdata_Get(object):
         try:
             dura_time = open(dura_time_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for duratime in dura_time:
@@ -258,7 +241,7 @@ class Reportdata_Get(object):
                 Dura_Time.append(L[i].strip())
             return Dura_Time
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             dura_time.close()
 
@@ -269,7 +252,7 @@ class Reportdata_Get(object):
         try:
             mcs_txrate = open(mcs_txrate_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for mcstxrate in mcs_txrate:
@@ -278,7 +261,7 @@ class Reportdata_Get(object):
                 MCS_Tx_Rate.append(L[i].strip())
             return MCS_Tx_Rate
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             mcs_txrate.close()
 
@@ -289,7 +272,7 @@ class Reportdata_Get(object):
         try:
             mcs_rxrate = open(mcs_rxrate_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for mcsrxrate in mcs_rxrate:
@@ -298,7 +281,7 @@ class Reportdata_Get(object):
                 MCS_Rx_Rate.append(L[i].strip())
             return MCS_Rx_Rate
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             mcs_rxrate.close()
 
@@ -309,7 +292,7 @@ class Reportdata_Get(object):
         try:
             nss_txrate = open(nss_txrate_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for nsstxrate in nss_txrate:
@@ -318,7 +301,7 @@ class Reportdata_Get(object):
                 NSS_Tx_Rate.append(L[i].strip())
             return NSS_Tx_Rate
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             nss_txrate.close()
 
@@ -329,7 +312,7 @@ class Reportdata_Get(object):
         try:
             nss_rxrate = open(nss_rxrate_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for nssrxrate in nss_rxrate:
@@ -338,7 +321,7 @@ class Reportdata_Get(object):
                 NSS_Rx_Rate.append(L[i].strip())
             return NSS_Rx_Rate
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             nss_rxrate.close()
 
@@ -349,7 +332,7 @@ class Reportdata_Get(object):
         try:
             bw_txrate = open(bw_txrate_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for bwtxrate in bw_txrate:
@@ -358,7 +341,7 @@ class Reportdata_Get(object):
                 BW_Tx_Rate.append(L[i].strip())
             return BW_Tx_Rate
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             bw_txrate.close()
 
@@ -369,7 +352,7 @@ class Reportdata_Get(object):
         try:
             bw_rxrate = open(bw_rxrate_path)
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
             exit(-1)
         try:
             for bwrxrate in bw_rxrate:
@@ -378,9 +361,91 @@ class Reportdata_Get(object):
                 BW_Rx_Rate.append(L[i].strip())
             return BW_Rx_Rate
         except Exception as err:
-            logging.info(err)
+            logger.info(err)
         finally:
             bw_rxrate.close()
+
+    @staticmethod
+    def RSSI_TXANT_get():
+        L = []
+        rssi_txant_path = result_file + "rssi_txant.txt"
+        try:
+            rssi_txant = open(rssi_txant_path)
+        except Exception as err:
+            logger.info(err)
+            exit(-1)
+        try:
+            for rssitxant in rssi_txant:
+                L.append(rssitxant)
+            for i in range(len(L)):
+                TX_RSSI_ANT.append(L[i].strip())
+            return TX_RSSI_ANT
+        except Exception as err:
+            logger.info(err)
+        finally:
+            rssi_txant.close()
+
+    @staticmethod
+    def POWER_TXANT_get():
+        L = []
+        power_txant_path = result_file + "power_txant.txt"
+        try:
+            power_txant = open(power_txant_path)
+        except Exception as err:
+            logger.info(err)
+            exit(-1)
+        try:
+            for powertxant in power_txant:
+                L.append(powertxant)
+            for i in range(len(L)):
+                TX_POWER_ANT.append(L[i].strip())
+            return TX_POWER_ANT
+        except Exception as err:
+            logger.info(err)
+        finally:
+            power_txant.close()
+
+    @staticmethod
+    def RSSI_RXANT_get():
+        L = []
+        rssi_rxant_path = result_file + "rssi_rxant.txt"
+        try:
+            rssi_rxant = open(rssi_rxant_path)
+        except Exception as err:
+            logger.info(err)
+            exit(-1)
+        try:
+            for rssirxant in rssi_rxant:
+                L.append(rssirxant)
+            for i in range(len(L)):
+                RX_RSSI_ANT.append(L[i].strip())
+            return RX_RSSI_ANT
+        except Exception as err:
+            logger.info(err)
+        finally:
+            rssi_rxant.close()
+
+    @staticmethod
+    def POWER_RXANT_get():
+        L = []
+        power_rxant_path = result_file + "power_rxant.txt"
+        try:
+            power_rxant = open(power_rxant_path)
+        except Exception as err:
+            logger.info(err)
+            exit(-1)
+        try:
+            for powerrxant in power_rxant:
+                L.append(powerrxant)
+            for i in range(len(L)):
+                RX_POWER_ANT.append(L[i].strip())
+            return RX_POWER_ANT
+        except Exception as err:
+            logger.info(err)
+        finally:
+            power_rxant.close()
+
+
 
 
 if __name__ == "__main__":
@@ -404,3 +469,5 @@ if __name__ == "__main__":
     Reportdata_Get.NSS_RxRate_get()
     Reportdata_Get.BW_TxRate_get()
     Reportdata_Get.BW_RxRate_get()
+    Reportdata_Get.RSSI_ANT_get()
+    Reportdata_Get.POWER_ANT_get()

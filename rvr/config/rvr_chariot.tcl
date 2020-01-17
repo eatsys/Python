@@ -1,54 +1,64 @@
 
 #cd D:/work/Reamon/Python/rvr/config
-set config_work "D:/work/Reamon/Python/rvr/config"
+set config_work "D:/rvr/config"
 #work改为config_work
 cd $config_work
 source "$config_work/get_config.tcl"
 set ap [getConfig "config.ini" "ap_config" "ap_type"]
-string trim $ap
+set ap [string trim $ap]
 puts "AP:	$ap"
 set radio [getConfig "config.ini" "ap_config" "radio"]
-string trim $radio
+set radio [string trim $radio]
 puts "Radio:	$radio"
 set channel [getConfig "config.ini" "ap_config" "channel"]
-string trim $channel
+set channel [string trim $channel]
 puts "Channel:	$channel"
 set pcip [getConfig "config.ini" "chariot_config" "pc_ip"]
-string trim $pcip
+set pcip [string trim $pcip]
 puts "PC_IP:	$pcip"
 set staip [getConfig "config.ini" "chariot_config" "sta_ip"]
-string trim $staip
+set staip [string trim $staip]
 puts "STA_IP:	$staip"
 set duration [getConfig "config.ini" "chariot_config" "duration"]
-string trim $duration
+set duration [string trim $duration]
 puts "TEST_DURATION:	$duration"
 set pairNumber [getConfig "config.ini" "chariot_config" "pair_number"]
-string trim $pairNumber
+set pairNumber [string trim $pairNumber]
 puts "TEST_PAIRS:	$pairNumber"
 set attenvalue [getConfig "config.ini" "chariot_config" "atten_value"]
-string trim $attenvalue
+set attenvalue [string trim $attenvalue]
 puts "TEST_ATTENUATE:	$attenvalue"
 set current_angle [getConfig "config.ini" "swivel_table_config" "current_angle"]
-string trim $current_angle
+set current_angle [string trim $current_angle]
 puts "TEST_Angle:	$current_angle"
 
-set log_dir "D:/work/Reamon/Python/rvr/Result"
-if {![file isdirectory $log_dir/IxChariotOD/$ap]} {
-  file mkdir $log_dir/IxChariotOD/$ap
+set log_dir "D:/rvr/Result"
+if {![file isdirectory $log_dir/IxChariotOD/${ap}_${radio}]} {
+  file mkdir $log_dir/IxChariotOD/${ap}_${radio}
 }
 
-set result $log_dir/IxChariotOD/$ap/${radio}_${channel}_${attenvalue}_$current_angle
+set result $log_dir/IxChariotOD/${ap}_${radio}/${radio}_${channel}_${attenvalue}_$current_angle
 set tstResult ${result}.tst
 
-set IxChariot_installation_dir "C:/Program Files (x86)/Ixia/IxChariot"
+set IxChariot_installation_dir "C:/Program\ Files\ (x86)/Ixia/IxChariot"
 #puts c:
 cd $IxChariot_installation_dir
 
-set script "C:/Program Files (x86)/Ixia/IxChariot/Scripts/High_Performance_Throughput.scr"
+set script "C:/Program\ Files\ (x86)/Ixia/IxChariot/Scripts/High_Performance_Throughput.scr"
 set timeout 5
 
+puts $IxChariot_installation_dir
 load ChariotExt
+puts $errorInfo
 package require ChariotExt
+
+#lappend ::auto_path "C:/Program\ Files\ (x86)/Ixia/IxChariot/aptixia/lib/common/tclclient"
+#load ChariotExt
+#package require ChariotExt
+#package require AptixiaClient 2.0
+
+#load ChariotExt
+#package require ChariotExt
 
 foreach {direct src dst} [subst {Tx $pcip $staip Rx $staip $pcip}] {
 #puts $direct
@@ -129,6 +139,7 @@ while {!$done} {
 #
 #puts "Average Throughput:	$avg Mbps"
 
+
 puts "Save the test..."
 set tstResult ${result}_$direct.tst
 chrTest save $test $tstResult
@@ -136,5 +147,6 @@ set txtResult ${result}_$direct.txt
 exec FMTTST $tstResult $txtResult
 
 chrTest delete $test force
+after 5000
 }
 exit

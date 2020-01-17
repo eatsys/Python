@@ -1,23 +1,14 @@
 __author__ = 'DVTRF'
 
 import os
-from config import conf
 import data.write_datas
-from data.parameters import RADIO, CHANNEL, ANGLE, ATTENUATE_LIST
+from data.parameters import AP_TYPE, RADIO, CHANNEL, ANGLE_NUM, ANGLE_LIST, ATTENUATE_LIST, DURA_TIME
 import re
 import logging
+logger = logging.getLogger()
 
-
-LOG_FORMAT = "%(asctime)s - %(pathname)s - %(levelname)s - %(message)s"
-DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
-
-logging.basicConfig(filename='./log/log.txt', level=logging.INFO, format=LOG_FORMAT, datefmt=DATE_FORMAT)
-
-test_ap = str(conf.Ap_type_get()).strip()
 retval = os.getcwd()
-#print('11', retval)
-result_file = retval + '/Result/IxChariotOD/ ' + test_ap + '/'
-#print('22', result_file)
+result_file = retval + '/Result/IxChariotOD/' + AP_TYPE + '_' + RADIO + '/'
 
 
 # for Generate test report
@@ -35,13 +26,13 @@ class Throught(object):
                 f = open(file_path, "r")
                 #print('44', f)
             except Exception as err:
-                logging.error(err)
+                logger.error(err)
             else:
                 result = f.read()
-                txthrought = (re.findall(r'Totals:\s+\d.+', result)[0].split()[1].encode("ascii")).decode("ascii")
+                txthrought = re.sub(',', '', (re.findall(r'Totals:\s+\d.+', result)[0].split()[1].encode("ascii")).decode("utf-8"))
                 #print(txthrought)
                 data.write_datas.tx_tp_wirte(txthrought)
-                logging.info("tx_throught is    : {0} ".format(txthrought))
+                logger.info("tx_throught is    : {0} ".format(txthrought))
                 #print(txthrought)
                 f.close()
 
@@ -51,14 +42,47 @@ class Throught(object):
                 file_path = result_file + rx_data
                 f = open(file_path, "r")
             except Exception as err:
-                logging.error(err)
+                logger.error(err)
             else:
                 result = f.read()
-                rxthrought = re.findall(r'Totals:\s+\d.+', result)[0].split()[1].encode("ascii").decode('utf-8')
+                rxthrought = re.sub(',', '', re.findall(r'Totals:\s+\d.+', result)[0].split()[1].encode("ascii").decode('utf-8'))
                 data.write_datas.rx_tp_write(rxthrought)
-                logging.info("rx_throught is    : {0} ".format(rxthrought))
+                logger.info("rx_throught is    : {0} ".format(rxthrought))
                 #print(rxthrought)
                 f.close()
+
+    def get_tx_throught_simple(self):
+        try:
+            file_path = result_file + self.TX
+            #print('33', file_path)
+            f = open(file_path, "r")
+            #print('44', f)
+        except Exception as err:
+            logger.error(err)
+        else:
+            result = f.read()
+            txthrought = re.sub(',', '', (re.findall(r'Totals:\s+\d.+', result)[0].split()[1].encode("ascii")).decode("utf-8"))
+            #print(txthrought)
+            data.write_datas.tx_tp_wirte(txthrought)
+            logger.info("tx_throught is    : {0} ".format(txthrought))
+            #data.write_datas.test_time_write(DURA_TIME)
+            #print(txthrought)
+            f.close()
+
+    def get_rx_throught_simple(self):
+        try:
+            file_path = result_file + self.RX
+            f = open(file_path, "r")
+        except Exception as err:
+            logger.error(err)
+        else:
+            result = f.read()
+            rxthrought = re.sub(',', '', re.findall(r'Totals:\s+\d.+', result)[0].split()[1].encode("ascii").decode('utf-8'))
+            data.write_datas.rx_tp_write(rxthrought)
+            logger.info("rx_throught is    : {0} ".format(rxthrought))
+            data.write_datas.test_time_write(DURA_TIME)
+            #print(rxthrought)
+            f.close()
 
 
 # for print  throught to gui
@@ -67,7 +91,7 @@ def tx_throught(i):
         tx_path = result_file + " " + str(i) + "_Tx.txt"
         f_tx = open(tx_path, "r")
     except:
-        logging.error("fail to open test result")
+        logger.error("fail to open test result")
     try:
         tx_result = f_tx.read()
         tx = re.findall(r'Totals:\s+\d.+', tx_result)[0].split()[1].encode("ascii")
@@ -84,7 +108,7 @@ def rx_throught(i):
         rx_path = result_file + " " + str(i) + "_Rx.txt"
         f_rx = open(rx_path, "r")
     except:
-        logging.error("fail to open test result")
+        logger.error("fail to open test result")
     try:
         rx_result = f_rx.read()
         rx = re.findall(r'Totals:\s+\d.+', rx_result)[0].split()[1].encode("ascii").decode("ascii")
@@ -96,13 +120,13 @@ def rx_throught(i):
 
 # gen file name
 def Generate_TP_To_Txt():
-    if ANGLE == 1:
+    if ANGLE_NUM == 1:
         for i in ATTENUATE_LIST:
             for angle in [0]:
                 RX = []
                 TX = []
-                rx = " " + RADIO + "_ " + CHANNEL + "_ " + str(i) + "_ " + str(angle) + "_Rx.txt"
-                tx = " " + RADIO + "_ " + CHANNEL + "_ " + str(i) + "_ " + str(angle) + "_Tx.txt"
+                rx = RADIO + "_" + CHANNEL + "_" + str(i) + "_" + str(angle) + "_Rx.txt"
+                tx = RADIO + "_" + CHANNEL + "_" + str(i) + "_" + str(angle) + "_Tx.txt"
                 RX.append(rx)
                 TX.append(tx)
                 throught = Throught(RX, TX)
@@ -110,13 +134,13 @@ def Generate_TP_To_Txt():
                 throught.get_rx_throught()
                 print('TX', TX)
                 print('RX', RX)
-    elif ANGLE == 4:
+    elif ANGLE_NUM == 4:
         for i in ATTENUATE_LIST:
             for angle in [0, 90.0, 180.0, 270.0]:
                 RX = []
                 TX = []
-                rx = " " + RADIO + "_ " + CHANNEL + "_ " + str(i) + "_ " + str(angle) + "_Rx.txt"
-                tx = " " + RADIO + "_ " + CHANNEL + "_ " + str(i) + "_ " + str(angle) + "_Tx.txt"
+                rx = RADIO + "_" + CHANNEL + "_" + str(i) + "_" + str(angle) + "_Rx.txt"
+                tx = RADIO + "_" + CHANNEL + "_" + str(i) + "_" + str(angle) + "_Tx.txt"
                 RX.append(rx)
                 TX.append(tx)
                 throught = Throught(RX, TX)
@@ -124,14 +148,14 @@ def Generate_TP_To_Txt():
                 throught.get_rx_throught()
                 print('TX', TX)
                 print('RX', RX)
-    elif ANGLE == 8:
+    elif ANGLE_NUM == 8:
         # for i in range(ATTEN_START+LINE_LOSS,ATTEN_END+LINE_LOSS+ATTEN_STEP,ATTEN_STEP):
         for i in ATTENUATE_LIST:
-            for angle in [0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0]:
+            for angle in ANGLE_LIST:
                 RX = []
                 TX = []
-                rx = " " + RADIO + "_ " + CHANNEL + "_ " + str(i) + "_ " + str(angle) + "_Rx.txt"
-                tx = " " + RADIO + "_ " + CHANNEL + "_ " + str(i) + "_ " + str(angle) + "_Tx.txt"
+                rx = f'{RADIO}_{CHANNEL}_{str(i)}_{str(angle)}_Rx.txt'
+                tx = f'{RADIO}_{CHANNEL}_{str(i)}_{str(angle)}_Tx.txt'
                 RX.append(rx)
                 TX.append(tx)
                 throught = Throught(RX, TX)

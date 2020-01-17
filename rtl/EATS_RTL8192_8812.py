@@ -2,6 +2,7 @@
 # @Time    : 2019/1/18 13:23
 # @Author  : Ethan
 # @FileName: tx_test.py
+"""adjust always on"""
 
 from __future__ import division
 from openpyxl import load_workbook

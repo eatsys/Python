@@ -15,6 +15,7 @@ import csv
 import re
 import logging
 
+
 class IQxel():
     def __init__(self, ip, visaDLL=None, *args):
         self.ip = ip
@@ -172,10 +173,10 @@ class IQxel():
         self.instance.write('%sVSA%s;FREQ:cent %d' % (mw, iq_rout, channels))
         self.instance.write('%sVSA%s;SRAT 160000000' % (mw, iq_rout))
         self.instance.write('%sVSA%s ;RLEVel:AUTO' % (mw, iq_rout))
-        #rlevel = target_power + 15
+        # rlevel = target_power + 15
         # print(rlevel)
-        #time.sleep(sleep_time)
-        #self.instance.write('%sVSA%s;RLEV %d;*wai;*opc?' % (mw, iq_rout, rlevel))
+        # time.sleep(sleep_time)
+        # self.instance.write('%sVSA%s;RLEV %d;*wai;*opc?' % (mw, iq_rout, rlevel))
 
         # self.__log__(log_switch, chain)
 
@@ -419,7 +420,7 @@ class IQxel():
             data_len = len(data)
             self.__log__(log_switch, data_len)
             data = data.split(',')
-            if data_len < 3:
+            if data[0] != '0' or data_len < 3:
                 print('Error', data)
                 avg_power = 'NA'
                 result_pwr = 'NA'
@@ -599,12 +600,90 @@ class IQxel():
                 writer2 = csv.writer(f2)
                 writer2.writerow([channel, rate, chain, target_power, avg_power, gain, spec_pwr, result_pwr,
                                   avg_evm, spec_evm, result_evm, symbol_clock_error, spec_symbol_clock_error,
-                                  result_symbol_clock_error, lo_leakage, spec_lo_leakage, result_lo_leakage, obw, spec_obw,
+                                  result_symbol_clock_error, lo_leakage, spec_lo_leakage, result_lo_leakage, obw,
+                                  spec_obw,
                                   result_obw, mask, spec_mask, result_mask, flatness, spec_flatness, result_flatness,
-                                  ramp_on_time, spec_ramp_on_time, result_ramp_on_time, ramp_off_time, spec_ramp_off_time,
+                                  ramp_on_time, spec_ramp_on_time, result_ramp_on_time, ramp_off_time,
+                                  spec_ramp_off_time,
                                   result_ramp_off_time])
 
         return avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask
+
+    def vsg(self):
+        loss_path = 1
+        idns = self.instance.query('*IDN?')
+        # print(idns)
+        iq_port_model = iq_port.isdigit()
+        # print(iq_port_model)
+        iq_model = idns.split(',')
+        # print(iq_model)
+        iq_model = iq_model[1]
+        # print(iq_model)
+        if iq_model == 'IQXEL' and iq_port_model is True:
+            mw = ''
+        elif iq_model == 'IQXEL-M' and iq_port_model is False:
+            mw = ''
+        elif iq_model == 'IQXEL-MW' and iq_port_model is False:
+            mw = 'M'
+        elif chain == '0':
+            loss_path = '1'
+        elif chain == '1':
+            loss_path = '2'
+        elif chain == '3':
+            loss_path = '3'
+        self.instance.write('%sVSG%s;RFC:USE "%s",RF%s' % (mw, iq_rout, loss_path, iq_port))
+        self.instance.write('%sVSG%s;RFC:STAT  ON,RF%s' % (mw, iq_rout, iq_port))
+        # rint(mw, iq_rout, iq_port, iq_rout)
+        self.instance.write('%sROUT%s;PORT:RES RF%s,VSG%s' % (mw, iq_rout, iq_port, iq_rout))
+        self.instance.write('CHAN1;WIFI')
+        channels = int(channel * 1000000)
+        self.instance.write('%sVSG%s;FREQ:cent %d' % (mw, iq_rout, channels))
+        self.instance.write('%sVSG%s;SRAT 160000000' % (mw, iq_rout))
+        # loss = abs(loss)
+        # print(type(start), type(loss))
+        # rlevel = start + loss
+        rlevel = start
+        # print(start, rlevel)
+        time.sleep(sleep_time)
+        self.instance.write('%sVSG%s;POW:lev %d' % (mw, iq_rout, rlevel))
+        self.instance.write('VSG1;POW:STAT ON')
+        self.instance.write('VSG1;MOD:STAT ON')
+        self.instance.write('VSG1;WAVE:EXEC OFF')
+        self.instance.write('VSG1;WLIS:COUN %d' % int(rx_packets))
+        # wave = 'OFDM-6'
+        if mode == '11b' and rates == '1':
+            wave = 'DSSS-1L'
+            vsg_delay = sleep_time + int(rx_packets) / 100 + 5 - int(rates) * int(rx_packets) / 1000
+        elif mode == '11b' and rates == '2':
+            wave = 'DSSS-2L'
+            vsg_delay = sleep_time + int(rx_packets) / 100 - int(rates) * int(rx_packets) / 1000
+        elif mode == '11b' and rates == '5.5':
+            wave = 'CCK-5_5S'
+            vsg_delay = sleep_time + int(rx_packets) / 100 - int(float(rates) * int(rx_packets) / 1000)
+        elif mode == '11b' and rates == '11':
+            wave = 'CCK-11S'
+            vsg_delay = sleep_time + int(rx_packets) / 100 - int(rates) * int(rx_packets) / 1800
+        elif mode == '11g' or mode == '11a':
+            wave = 'OFDM-' + rates
+            vsg_delay = sleep_time + int(rx_packets) / 100 - int(rates) * int(rx_packets) / 6000
+        elif mode == '11n':
+            wave = 'HT' + bw + '_MCS' + rates
+            vsg_delay = sleep_time + int(rx_packets) / 100 - int(rates) * int(rx_packets) / 1000
+        elif mode == '11ac':
+            wave = '11AC_VHT' + bw + '_S1_MCS' + rates
+            vsg_delay = sleep_time + int(rx_packets) / 100 - int(rates) * int(rx_packets) / 1000
+        # print(wave)
+        print('Delay Time:', vsg_delay)
+        self.instance.write('VSG1; WAVE:LOAD "/user/WiFi_%s.iqvsg"' % wave)
+        self.instance.write('VSG1 ;wave:exec off')
+        self.instance.write('WLIST:WSEG1:DATA "/user/WiFi_%s.iqvsg"' % wave)
+        self.instance.write('wlist:wseg1:save')
+        self.instance.write('WLIST:COUNT:ENABLE WSEG1')
+        self.instance.write('WAVE:EXEC ON, WSEG1')
+        time.sleep(vsg_delay)
+        self.instance.write('VSG1 ;WAVE:EXEC OFF')
+        self.instance.write('WLIST:COUNT:DISABLE WSEG1')
+
 
 class dut():
     def __init__(self):
@@ -636,7 +715,7 @@ class dut():
             logging.warning('%s Login Fail' % host)
             return False
 
-    def init(self,  str1,   str2,   str3):
+    def init(self, str1, str2, str3):
         self.tn.read_until(b'WAP>', timeout=1)
         self.tn.write(str1.encode('ascii') + b'\n')
 
@@ -646,11 +725,11 @@ class dut():
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
         self.tn.write(str3.encode('ascii') + b'\n')
 
-        #self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        #self.tn.write(b'iwpriv Hisilicon0 adjust_ppm -10' + b'\n')
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'iwpriv Hisilicon0 adjust_ppm -10' + b'\n')
 
-        #command_result = self.tn.read_very_eager().decode('ascii')
-        #logging.info('\n%s' % command_result)
+        # command_result = self.tn.read_very_eager().decode('ascii')
+        # logging.info('\n%s' % command_result)
 
     def ex_command(self, command):
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
@@ -659,74 +738,81 @@ class dut():
         command_result = self.tn.read_very_eager().decode('ascii')
         logging.info('\n%s' % command_result)
 
-
     def tx(self, mode, channel, bw, rate, chain):
+        if int(channel) < 5000:
+            band = id_2g
+        else:
+            band = id_5g
         # for 2.4g
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
         self.tn.write(b'\r\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'ifconfig vap0 down' + b'\n')
+        self.tn.write(b'ifconfig vap%s down' % band.encode('ascii') + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iwpriv vap0 setessid Hi24g' + b'\n')
+        self.tn.write(b'iwpriv vap%s setessid Hi24g' % band.encode('ascii') + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iwpriv vap0 mode %s' % mode.encode('ascii') + b'\n')
-        #print(channel)
+        self.tn.write(b'iwpriv vap%s mode %s' % (band.encode('ascii'), mode.encode('ascii')) + b'\n')
+        # print(channel)
         if bw == '40':
             channels = int(channel) - 10
-            #print(channel)
+            # print(channel)
         else:
             channels = channel
-        channels = '{:.0f}'.format((int(channels)-2407)/5) #2407+5*1=2412
-        #print(channel)'{:.3f}'.format(delta_power)
+        channels = '{:.0f}'.format((int(channels) - 2407) / 5)  # 2407+5*1=2412
+        # print(channel)'{:.3f}'.format(delta_power)
         channels = str(channels)
-        #print(channel)
+        # print(channel)
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iwpriv vap0 channel %s' % channels.encode('ascii') + b'\n')
+        self.tn.write(b'iwpriv vap%s channel %s' % (band.encode('ascii'), channels.encode('ascii')) + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iwpriv vap0 privflag 1' + b'\n')
+        self.tn.write(b'iwpriv vap%s privflag 1' % band.encode('ascii') + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iwpriv vap0 al_rx 0' + b'\n')
+        self.tn.write(b'iwpriv vap%s al_rx 0' % band.encode('ascii') + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'hipriv.sh "vap0 2040bss_enable 0"' + b'\n')
+        self.tn.write(b'hipriv.sh "vap%s 2040bss_enable 0"' % band.encode('ascii') + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'hipriv.sh "vap0 radartool enable 0"' + b'\n')
+        self.tn.write(b'hipriv.sh "vap%s radartool enable 0"' % band.encode('ascii') + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'hipriv.sh "vap0 acs sw 0"' + b'\n')
+        self.tn.write(b'hipriv.sh "vap%s acs sw 0"' % band.encode('ascii') + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'ifconfig vap0 up' + b'\n')
+        self.tn.write(b'ifconfig vap%s up' % band.encode('ascii') + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iwpriv vap0 al_tx 0' + b'\n')
+        self.tn.write(b'iwpriv vap%s al_tx 0' % band.encode('ascii') + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        #self.tn.write(b'hipriv.sh "vap0 add_user 07:06:05:04:03:02 1"\r')
-        self.tn.write(b'iwpriv vap0 bw %s' % bw.encode('ascii') + b'\n')
+        # self.tn.write(b'hipriv.sh "vap%s add_user 07:06:05:04:03:02 1"\r')
+        self.tn.write(b'iwpriv vap%s bw %s' % (band.encode('ascii'), bw.encode('ascii')) + b'\n')
         if mode == '11b' or mode == '11g':
             rates = 'rate'
         else:
             rates = 'mcs'
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iwpriv vap0 %s ' % rates.encode('ascii') + b'%s' % rate.encode('ascii') + b'\n')
+        self.tn.write(
+            b'iwpriv vap%s %s %s' % (band.encode('ascii'), rates.encode('ascii'), rate.encode('ascii')) + b'\n')
         if chain == '0':
             chains = '01'
         else:
             chains = '10'
-        #print('chain set',chain,type(chain),chains)
+        # print('chain set',chain,type(chain),chains)
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iwpriv vap0 txch 00%s' % chains.encode('ascii') + b'\n')
+        self.tn.write(b'iwpriv vap%s txch 00%s' % (band.encode('ascii'), chains.encode('ascii')) + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iwpriv vap0 al_tx "1 2 1000"' + b'\n')
+        self.tn.write(b'iwpriv vap%s al_tx "1 2 1000"' % band.encode('ascii') + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'hipriv.sh "vap0 set_tx_pow rf_reg_ctl 0"' + b'\n')
+        self.tn.write(b'hipriv.sh "vap%s set_tx_pow rf_reg_ctl 0"' % band.encode('ascii') + b'\n')
         print('TX COMMANDS DONE')
 
     def get_paras(self):
-        #self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        #self.tn.write(b'hipriv.sh "vap0 set_tx_pow rf_reg_ctl 0"' + b'\n')
+        if int(channel) < 5000:
+            band = id_2g
+        else:
+            band = id_5g
+        # self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        # self.tn.write(b'hipriv.sh "vap%s set_tx_pow rf_reg_ctl 0"' % band.encode('ascii') + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'hipriv.sh "vap0 set_tx_pow rf_reg_ctl 1"' + b'\n')
+        self.tn.write(b'hipriv.sh "vap%s set_tx_pow rf_reg_ctl 1"' % band.encode('ascii') + b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'hipriv.sh "vap0 reginfo soc 0x200380%s 0x200380%s";dmesg -c'
-                      % (channel_groups.encode('ascii'), channel_groups.encode('ascii')) + b'\n')
+        self.tn.write(b'hipriv.sh "vap%s reginfo soc 0x200380%s 0x200380%s";dmesg -c'
+                      % (band.encode('ascii'), channel_groups.encode('ascii'), channel_groups.encode('ascii')) + b'\n')
         # self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
         # command_result = self.tn.read_very_eager().decode('ascii')
         command_result = self.tn.read_until(b'value=0x\w+\r\r\nWAP(Dopra Linux) # ', timeout=2)
@@ -735,19 +821,23 @@ class dut():
         print('Default Value(HEX):', default_value)
         default_value = int(default_value, 16)
         return default_value
-        #print(default_value)
+        # print(default_value)
         # pwr_para = default_value + 2
         # pwr_paras = h#ex(pwr_para)
         ##print(pwr_paras)
         # print(channel_groups, pwr_paras)
 
     def adjust_power(self):
+        if int(channel) < 5000:
+            band = id_2g
+        else:
+            band = id_5g
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'hipriv.sh "vap0 regwrite soc 0x200380%s 0x%s"'
-                      % (channel_groups.encode('ascii'), pwr_paras.encode('ascii')) + b'\n')
+        self.tn.write(b'hipriv.sh "vap%s regwrite soc 0x200380%s 0x%s"'
+                      % (band.encode('ascii'), channel_groups.encode('ascii'), pwr_paras.encode('ascii'))+ b'\n')
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'hipriv.sh "vap0 reginfo soc 0x200380%s 0x200380%s";dmesg -c'
-                      % (channel_groups.encode('ascii'), channel_groups.encode('ascii')) + b'\n')
+        self.tn.write(b'hipriv.sh "vap%s reginfo soc 0x200380%s 0x200380%s";dmesg -c'
+                      % (band.encode('ascii'), channel_groups.encode('ascii'), channel_groups.encode('ascii')) + b'\n')
         command_result = self.tn.read_until(b'value=0x\w+\r\r\nWAP(Dopra Linux) # ', timeout=1)
         command_result = re.search(b'value=0x\w+', command_result)
         default_value = re.sub('value=0x', '', command_result.group().decode('ascii'))
@@ -756,6 +846,10 @@ class dut():
         return gain
 
     def set_default(self):
+        if int(channel) < 5000:
+            band = id_2g
+        else:
+            band = id_5g
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
         self.tn.write(b'exit' + b'\n')
         self.tn.read_until(b'SU_WAP>', timeout=1)
@@ -767,14 +861,80 @@ class dut():
         self.tn.write(b'wifi_equipment.sh init chip 1' + b'\n')
         time.sleep(2)
         self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'hipriv.sh "vap0 set_tx_pow rf_reg_ctl 0"' + b'\n')
+        self.tn.write(
+            b'hipriv.sh "vap%s set_tx_pow rf_reg_ctl 0"' % (band.encode('ascii'), band.encode('ascii'))  + b'\n')
+
+    def rx(self, mode, channel, bw, rate, chain):
+        if int(channel) < 5000:
+            band = id_2g
+        else:
+            band = id_5g
+        # for 2.4g
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'\r\n')
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'iwpriv vap%s al_tx 0' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'iwpriv vap%s al_rx 0' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'ifconfig vap%s down' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'ifconfig vap%s hw ether 00:E0:52:22:22:14' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'ifconfig vap%s al_rx 1' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'ifconfig vap%s setessid HS8145V_HW_TEST_2G ' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=5)
+        self.tn.write(b'iwpriv vap%s mode %s' % (band.encode('ascii'), mode.encode('ascii')) + b'\n')
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'iwpriv vap%s bw %s' % (band.encode('ascii'), bw.encode('ascii')) + b'\n')
+        if int(channel) < 5000:
+            channels = '{:.0f}'.format((int(channel) - 2407) / 5)
+        else:
+            channels = '{:.0f}'.format((int(channel) - 5000) / 5)
+        channels = str(channels)
+        # print(channel)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'iwpriv vap%s channel %s' % (band.encode('ascii'), channels.encode('ascii')) + b'\n')
+        if chain == '0':
+            chains = '01'
+        else:
+            chains = '10'
+        # print('chain set',chain,type(chain),chains)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'iwpriv vap%s rxch 00%s' % (band.encode('ascii'), chains.encode('ascii')) + b'\n')
+        if mode == '11b' or mode == '11g':
+            rates = 'rate'
+        else:
+            rates = 'mcs'
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'iwpriv vap%s %s %s' % (band.encode('ascii'), rates.encode('ascii'), rate.encode('ascii')) + b'\n')
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'ifconfig vap%s up' % band.encode('ascii') + b'\n')
+        print('RX COMMANDS DONE')
+
+    def get_statistics(self):
+        if int(channel) < 5000:
+            band = id_2g
+        else:
+            band = id_5g
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.write(b'hipriv.sh "vap%s rx_fcs_info 1 2";dmesg -c' % band.encode('ascii') + b'\n')
+        command_result = self.tn.read_until(b'rssi', timeout=2)
+        # print(command_result)
+        command_result = re.search(b'succ:\w+', command_result)
+        # print(command_result)
+        # print(command_result.group())
+        PER_value = re.sub('succ:', '', command_result.group().decode('ascii'))
+        print('Packets:', rx_packets, 'PER:', PER_value)
+        return PER_value
 
 
 if __name__ == '__main__':
     init(autoreset=True)
 
     Number = input("SN:")
-    sn = "SN_"+Number
+    sn = "SN_" + Number
 
     dut_file = csv.reader(open('./config.csv'))
     for rows in dut_file:
@@ -811,88 +971,105 @@ if __name__ == '__main__':
         elif rows[0] == 'IQ_Rout':
             iq_rout = rows[1]
             print('IQ ROUT: ', iq_rout)
+        elif rows[0] == 'RX_Packets':
+            rx_packets = rows[1]
+            print('RX Packets: ', rx_packets)
+        elif rows[0] == '2G_ID':
+            id_2g = rows[1]
+            print('2G ID: ', id_2g)
+        elif rows[0] == '5G_ID':
+            id_5g = rows[1]
+            print('5G ID: ', id_5g)
 
     log_switch = int(le)
     sleep_time = float(st)
-    #INIT IQ
+    # INIT IQ
     iq = IQxel(iq_ip)
     iq.open()
     iq.read_idn()
     iq.reset()
     iq.set_pathloss()
 
-    #INIT DUT
+    # INIT DUT
     dt = dut()
     dt.login(dut_ip, user, pwd)
     dt.init(add1, add2, add3)
-    #dt.ex_command('reboot')
-    #print('Reboot DUT, Please wait...')
-    #time.sleep(60#)
-    #dt = dut()
-    #dt.login(dut_ip, user, pwd)
-    #dt.init(add1, add2, add3)
+    # dt.ex_command('reboot')
+    # print('Reboot DUT, Please wait...')
+    # time.sleep(60#)
+    # dt = dut()
+    # dt.login(dut_ip, user, pwd)
+    # dt.init(add1, add2, add3)
 
-    #INIT SPEC
-    spec_file = load_workbook('./spec.xlsx')
-    #print(spec_file.sheetnames)
-    sheet = spec_file['Sheet1']
-    rows = []
-    ratelist_pwr = ['1M', '2M', '5_5M', '11M','6M','9M','12M','18M','24M','36M','48M','54M','HT20_MCS0','HT20_MCS1',
-                'HT20_MCS2','HT20_MCS3','HT20_MCS4','HT20_MCS5','HT20_MCS6','HT20_MCS7','HT40_MCS0','HT40_MCS1',
-                'HT40_MCS2','HT40_MCS3','HT40_MCS4','HT40_MCS5','HT40_MCS6','HT40_MCS7']
-    ratelist_evm = ['1M_EVM', '2M_EVM', '5_5M_EVM', '11M_EVM', '6M_EVM', '9M_EVM', '12M_EVM', '18M_EVM', '24M_EVM',
-                '36M_EVM', '48M_EVM', '54M_EVM', 'HT20_MCS0_EVM', 'HT20_MCS1_EVM', 'HT20_MCS2_EVM', 'HT20_MCS3_EVM',
-                'HT20_MCS4_EVM', 'HT20_MCS5_EVM', 'HT20_MCS6_EVM', 'HT20_MCS7_EVM', 'HT40_MCS0_EVM', 'HT40_MCS1_EVM',
-                'HT40_MCS2_EVM', 'HT40_MCS3_EVM', 'HT40_MCS4_EVM', 'HT40_MCS5_EVM', 'HT40_MCS6_EVM', 'HT40_MCS7_EVM']
-    target_pwr_1M, target_pwr_2M,  target_pwr_5_5M, target_pwr_11M, target_pwr_6M, target_pwr_9M, target_pwr_12M,\
-        target_pwr_18M, target_pwr_24M, target_pwr_36M, target_pwr_48M, target_pwr_54M, target_pwr_HT20_MCS0,\
-        target_pwr_HT20_MCS1, target_pwr_HT20_MCS2, target_pwr_HT20_MCS3, target_pwr_HT20_MCS4, target_pwr_HT20_MCS5,\
-        target_pwr_HT20_MCS6, target_pwr_HT20_MCS7, target_pwr_HT40_MCS0, target_pwr_HT40_MCS1, target_pwr_HT40_MCS2,\
-        target_pwr_HT40_MCS3, target_pwr_HT40_MCS4, target_pwr_HT40_MCS5, target_pwr_HT40_MCS6, target_pwr_HT40_MCS7\
+    # INIT SPEC
+    spec_file_2g = load_workbook('./spec_2g.xlsx')
+    # print(spec_file_2g.sheetnames)
+    sheet_2g = spec_file_2g['Sheet1']
+    rows_2g = []
+    ratelist_2g = ['1M', '2M', '5_5M', '11M', '6M', '9M', '12M', '18M', '24M', '36M', '48M', '54M', 'HT20_MCS0',
+                   'HT20_MCS1',
+                   'HT20_MCS2', 'HT20_MCS3', 'HT20_MCS4', 'HT20_MCS5', 'HT20_MCS6', 'HT20_MCS7', 'HT40_MCS0',
+                   'HT40_MCS1',
+                   'HT40_MCS2', 'HT40_MCS3', 'HT40_MCS4', 'HT40_MCS5', 'HT40_MCS6', 'HT40_MCS7']
+    ratelist_evm_2g = ['1M_EVM', '2M_EVM', '5_5M_EVM', '11M_EVM', '6M_EVM', '9M_EVM', '12M_EVM', '18M_EVM', '24M_EVM',
+                       '36M_EVM', '48M_EVM', '54M_EVM', 'HT20_MCS0_EVM', 'HT20_MCS1_EVM', 'HT20_MCS2_EVM',
+                       'HT20_MCS3_EVM',
+                       'HT20_MCS4_EVM', 'HT20_MCS5_EVM', 'HT20_MCS6_EVM', 'HT20_MCS7_EVM', 'HT40_MCS0_EVM',
+                       'HT40_MCS1_EVM',
+                       'HT40_MCS2_EVM', 'HT40_MCS3_EVM', 'HT40_MCS4_EVM', 'HT40_MCS5_EVM', 'HT40_MCS6_EVM',
+                       'HT40_MCS7_EVM']
+    target_pwr_1M, target_pwr_2M, target_pwr_5_5M, target_pwr_11M, target_pwr_6M, target_pwr_9M, target_pwr_12M, \
+    target_pwr_18M, target_pwr_24M, target_pwr_36M, target_pwr_48M, target_pwr_54M, target_pwr_HT20_MCS0, \
+    target_pwr_HT20_MCS1, target_pwr_HT20_MCS2, target_pwr_HT20_MCS3, target_pwr_HT20_MCS4, target_pwr_HT20_MCS5, \
+    target_pwr_HT20_MCS6, target_pwr_HT20_MCS7, target_pwr_HT40_MCS0, target_pwr_HT40_MCS1, target_pwr_HT40_MCS2, \
+    target_pwr_HT40_MCS3, target_pwr_HT40_MCS4, target_pwr_HT40_MCS5, target_pwr_HT40_MCS6, target_pwr_HT40_MCS7 \
         = [None] * 28
-    target_1M_EVM, target_2M_EVM, target_5_5M_EVM, target_11M_EVM, target_6M_EVM, target_9M_EVM, target_12M_EVM,\
-        target_18M_EVM, target_24M_EVM, target_36M_EVM, target_48M_EVM, target_54M_EVM, target_HT20_MCS0_EVM, \
-        target_HT20_MCS1_EVM, target_HT20_MCS2_EVM, target_HT20_MCS3_EVM, target_HT20_MCS4_EVM, target_HT20_MCS5_EVM,\
-        target_HT20_MCS6_EVM, target_HT20_MCS7_EVM, target_HT40_MCS0_EVM, target_HT40_MCS1_EVM, target_HT40_MCS2_EVM, \
-        target_HT40_MCS3_EVM, target_HT40_MCS4_EVM, target_HT40_MCS5_EVM, target_HT40_MCS6_EVM, target_HT40_MCS7_EVM \
+    target_1M_EVM, target_2M_EVM, target_5_5M_EVM, target_11M_EVM, target_6M_EVM, target_9M_EVM, target_12M_EVM, \
+    target_18M_EVM, target_24M_EVM, target_36M_EVM, target_48M_EVM, target_54M_EVM, target_HT20_MCS0_EVM, \
+    target_HT20_MCS1_EVM, target_HT20_MCS2_EVM, target_HT20_MCS3_EVM, target_HT20_MCS4_EVM, target_HT20_MCS5_EVM, \
+    target_HT20_MCS6_EVM, target_HT20_MCS7_EVM, target_HT40_MCS0_EVM, target_HT40_MCS1_EVM, target_HT40_MCS2_EVM, \
+    target_HT40_MCS3_EVM, target_HT40_MCS4_EVM, target_HT40_MCS5_EVM, target_HT40_MCS6_EVM, target_HT40_MCS7_EVM \
         = [None] * 28
-    for row in sheet:
-        rows.append(row)
-        # print(rows)
-    for r in range(sheet.max_row):
-        for c in range(sheet.max_column):
-            # print(rows[r][c].value)
-            rows[r][c].value = str(rows[r][c].value).strip()
+    for row in sheet_2g:
+        rows_2g.append(row)
+        # print(rows_2g)
+    for r in range(sheet_2g.max_row):
+        for c in range(sheet_2g.max_column):
+            # print(rows_2g[r][c].value)
+            rows_2g[r][c].value = str(rows_2g[r][c].value).strip()
             rs = r + 1
             cs = c + 1
-            if rows[r][c].value == 'POWER_ACCURACY':
-                spec_pwr = abs(rows[r][cs].value)
-            elif rows[r][c].value == 'EVM_MARGIN':
-                evm_margin = abs(rows[r][cs].value)
-            elif rows[r][c].value == 'Symbol_Clock_Error':
-                spec_symbol_clock_error = abs(rows[r][cs].value)
-            elif rows[r][c].value == 'LO_Leakage':
-                spec_lo_leakage = abs(rows[r][cs].value)
-            elif rows[r][c].value == 'MASK':
-                spec_mask = abs(rows[r][cs].value)
-            elif rows[r][c].value == 'OBW_20M':
-                spec_obw_20M = rows[r][cs].value
-            elif rows[r][c].value == 'OBW_40M':
-                spec_obw_40M = rows[r][cs].value
-            for x in ratelist_pwr:
-                if rows[r][c].value == x + '_target':
-                    exec('target_pwr_%s=%d' % (x, rows[rs][c].value))
+            if rows_2g[r][c].value == 'POWER_ACCURACY':
+                spec_pwr = abs(rows_2g[r][cs].value)
+            elif rows_2g[r][c].value == 'EVM_MARGIN':
+                evm_margin = abs(rows_2g[r][cs].value)
+            elif rows_2g[r][c].value == 'Symbol_Clock_Error':
+                spec_symbol_clock_error = abs(rows_2g[r][cs].value)
+            elif rows_2g[r][c].value == 'LO_Leakage':
+                spec_lo_leakage = abs(rows_2g[r][cs].value)
+            elif rows_2g[r][c].value == 'MASK':
+                spec_mask = abs(rows_2g[r][cs].value)
+            elif rows_2g[r][c].value == 'OBW_20M':
+                spec_obw_20M = rows_2g[r][cs].value
+            elif rows_2g[r][c].value == 'OBW_40M':
+                spec_obw_40M = rows_2g[r][cs].value
+            for x in ratelist_2g:
+                if rows_2g[r][c].value == x + '_target':
+                    exec('target_pwr_%s=%d' % (x, rows_2g[rs][c].value))
                     break
-            for i in ratelist_evm:
-                if rows[r][c].value == i + '_target':
-                    exec('target_%s=%d' % (i, rows[rs][c].value))
+            for i in ratelist_evm_2g:
+                if rows_2g[r][c].value == i + '_target':
+                    exec('target_%s=%d' % (i, rows_2g[rs][c].value))
+                    break
+            for j in ratelist_2g:
+                if rows_2g[r][c].value == j + '_sens':
+                    exec('sens_%s=%d' % (j, rows_2g[rs][c].value))
                     break
     targetpower = 0
     spec_evm = 0
-    #get pwr_paras
+    # get pwr_paras
 
-
-    #GEN Report
+    # GEN Report
     now_time = datetime.datetime.now()
     # print(now_time)
     now_time = str(now_time)
@@ -905,16 +1082,20 @@ if __name__ == '__main__':
     now_time = re.sub(':', '', now_time[0])
     now_time = day_time + now_time
     # print(now_time)
-    result_name = sn + '_' + 'TX_Result' + '_' + now_time + '.csv'
-    with open('./Result/' + result_name, 'w', newline='') as f:
+    tx_result_name = sn + '_' + 'TX_Result' + '_' + now_time + '.csv'
+    rx_result_name = sn + '_' + 'RX_Result' + '_' + now_time + '.csv'
+    with open('./Result/' + tx_result_name , 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['FREQ', 'DATA_RATE', 'CHAIN', 'TX_POWER', 'POWER', 'GAIN', 'LIMIT',
                          'RESULT', 'EVM', 'LIMIT', 'RESULT', 'FREQ_ERROR', 'LIMIT', 'RESULT',
                          'LOLEAKAGE', 'LIMIT', 'RESULT', 'OBW', 'LIMIT', 'RESULT',
                          'MASK', 'LIMIT', 'RESULT', 'FLATNESS', 'LIMIT', 'RESULT',
                          'RAMPONTIME', 'LIMIT', 'RESULT', 'RAMPOFFTIME', 'LIMIT', 'RESULT'])
+    with open('./Result/' + rx_result_name, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['FREQ', 'DATA_RATE', 'CHAIN', 'SENSITIVITY', 'PER', 'RESULT'])
 
-    #TEST FLOW
+    # TEST FLOW
     filename = 'TEST_FLOW.txt'
     f = open(filename)
     result = list()
@@ -925,32 +1106,43 @@ if __name__ == '__main__':
         else:
             line = line.strip()
             line = line.split()
-            #print(line)
-            #print('Channel:',line[1],'Rate:',line[2],'Chain:',line[3])
+            # print(line)
+            # print('Channel:',line[1],'Rate:',line[2],'Chain:',line[3])
+            item = re.sub('IQ_WIFI_TEST_', '', line[0])
             channel = line[1]
             rate = line[2]
             chain = line[3]
+            if item == 'RX':
+                start = int(line[4])
+                stop = int(line[5])
             # mode,bw,rates
             if rate == '1M' or rate == '2M' or rate == '5.5M' or rate == '11M':
                 mode = '11b'
                 bw = '20'
-                rates = re.sub('M','',rate)
+                rates = re.sub('M', '', rate)
+                per_spec = float(rx_packets) * 0.92
             elif rate == '6M' or rate == '9M' or rate == '12M' or rate == '18M' \
                     or rate == '24M' or rate == '36M' or rate == '48M' or rate == '54M':
-                mode = '11g'
+                if int(channel) < 5000:
+                    mode = '11g'
+                else:
+                    mode = '11a'
                 bw = '20'
-                rates = re.sub('M','',rate)
+                rates = re.sub('M', '', rate)
+                per_spec = float(rx_packets) * 0.9
             elif rate == 'HT20-MCS0' or rate == 'HT20-MCS1' or rate == 'HT20-MCS2' or rate == 'HT20-MCS3' \
                     or rate == 'HT20-MCS4' or rate == 'HT20-MCS5' or rate == 'HT20-MCS6' or rate == 'HT20-MCS7':
                 mode = '11ng20'
                 bw = '20'
                 rates = re.sub('HT20-MCS', '', rate)
+                per_spec = float(rx_packets) * 0.9
             elif rate == 'HT40-MCS0' or rate == 'HT40-MCS1' or rate == 'HT40-MCS2' or rate == 'HT40-MCS3' \
                     or rate == 'HT40-MCS4' or rate == 'HT40-MCS5' or rate == 'HT40-MCS6' or rate == 'HT40-MCS7':
                 mode = '11ng40plus'
                 bw = '40'
                 rates = re.sub('HT40-MCS', '', rate)
-            #chain
+                per_spec = float(rx_packets) * 0.9
+            # chain
             if chain == 'CHAIN0':
                 chain = re.sub('CHAIN', '', chain)
             elif chain == 'CHAIN1':
@@ -959,7 +1151,7 @@ if __name__ == '__main__':
                 chain = re.sub('CHAIN', '', chain)
             else:
                 chain = re.sub('CHAIN', '', chain)
-            #power para
+            # power para
             if int(channel) < 2437 and chain == '0':
                 channel_groups = '98'
             elif int(channel) < 2437 and chain == '1':
@@ -972,121 +1164,158 @@ if __name__ == '__main__':
                 channel_groups = '90'
             elif int(channel) >= 2462 and chain == '1':
                 channel_groups = 'a0'
+            if item == 'TX':
+                print('*************************************************************')
+                print('Mode:', mode, 'Channel:', channel, 'BW:', bw, 'Rate:', rate, 'Chain:', chain)
+                adjust_result = result_evm = result_symbol_clock_error = result_lo_leakage = result_mask = result_flatness = \
+                    'Pass'
+                avg_power = targetpower
+                gain = 0
+                # TX
+                channel = int(channel)
+                bw = str(bw)
+                rates = str(rates)
+                # dt.set_default()
+                dt.tx(mode, channel, bw, rates, chain)
+                init_value = dt.get_paras()
+                gain = init_value
+                print('INIT_VALUE(INT):', init_value)
 
-            print('*************************************************************')
-            print('Mode:', mode, 'Channel:', channel, 'BW:', bw, 'Rate:', rate, 'Chain:', chain)
-            adjust_result = result_evm = result_symbol_clock_error = result_lo_leakage = result_mask = result_flatness =\
-                'Pass'
-            avg_power = targetpower
-            gain = 0
-            #TX
-            channel = int(channel)
-            bw = str(bw)
-            rates = str(rates)
-            #dt.set_default()
-            dt.tx(mode, channel, bw, rates, chain)
-            init_value = dt.get_paras()
-            gain = init_value
-            print('INIT_VALUE(INT):', init_value)
-
-            #RESULT
-            rate_t = re.sub('-', '_', rate)
-            rate_t = re.sub('\.', '_', rate_t)
-            targetpower = eval('target_pwr_' + rate_t)
-            rate_e = rate_t + '_EVM'
-            spec_evm = eval('target_' + rate_e)
-            channel = int(channel)
-            chain = int(chain)
-            iq.read_data()
-            avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask = \
-                iq.get_data(mode, rate, channel, chain, result_name, targetpower, spec_pwr, gain, spec_evm, evm_margin,
-                        spec_symbol_clock_error, spec_lo_leakage, spec_mask, spec_obw_20M, spec_obw_40M)
-            if avg_power == 'NA' or result_evm == 'NA':
-                #avg_power = avg_evm = symbol_clock_error = lo_leakage = result = result_pwr = result_evm = \
-                #    result_symbol_clock_error = result_lo_leakage = result_mask = 'NA'
-                print(Fore.RED + 'No Result!' + Style.RESET_ALL)
-                continue
-            else:
-                avg_power = float(avg_power)
-                targetpower = float(targetpower)
-                max_power = float(targetpower + spec_pwr)
-                delta_power = avg_power - targetpower
-                delta_power = '{:.3f}'.format(delta_power)
-                delta_power = float(delta_power)
-                print('Default Measurer Power:', avg_power, 'Target Power:', targetpower, 'Delta Power:', delta_power)
-                #power is nomal but some is fail
-                if targetpower <= avg_power <= max_power:
-                    if result_evm == 'Fail' or result_symbol_clock_error == 'Fail' or result_lo_leakage == 'Fail' \
-                            or result_mask == 'Fail':
-                        print(Fore.RED + 'TX\'s quality are failed!' + Style.RESET_ALL)
-                    else:
-                        print('Get Good Result!')
-                # power is not nomal
+                # RESULT
+                rate_t = re.sub('-', '_', rate)
+                rate_t = re.sub('\.', '_', rate_t)
+                targetpower = eval('target_pwr_' + rate_t)
+                rate_e = rate_t + '_EVM'
+                spec_evm = eval('target_' + rate_e)
+                channel = int(channel)
+                chain = int(chain)
+                iq.read_data()
+                avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask = \
+                    iq.get_data(mode, rate, channel, chain, tx_result_name , targetpower, spec_pwr, gain, spec_evm,
+                                evm_margin,
+                                spec_symbol_clock_error, spec_lo_leakage, spec_mask, spec_obw_20M, spec_obw_40M)
+                if avg_power == 'NA' or result_evm == 'NA':
+                    # avg_power = avg_evm = symbol_clock_error = lo_leakage = result = result_pwr = result_evm = \
+                    #    result_symbol_clock_error = result_lo_leakage = result_mask = 'NA'
+                    print(Fore.RED + 'No Result!' + Style.RESET_ALL)
+                    continue
                 else:
-                    low_power_counts = 0
-                    setup = 2
-                    setups = 2
-                    print('Step:', setup)
-                    pwr_paras = init_value + setup
-                    pwr_paras = hex(pwr_paras)
-                    pwr_paras = re.sub('0x', '', pwr_paras)
-                    get_power = []
-                    get_delta_power = []
-                    c = 1
-                    get_power.append(avg_power)
-                    print('Measurer Power List:', get_power)
-                    get_delta_power.append(delta_power)
-                    print('Power Deviation List:', get_delta_power)
-                    print('Adjust Counts:', c)
-                    #ADJUST
-                    min_adj = avg_power - targetpower
-                    max_adj = avg_power - max_power
-                    while min_adj < 0 or max_adj > 0:
-                        print(Fore.GREEN + 'Adjust...' + Style.RESET_ALL)
-                        if avg_power > max_power:
-                            adj = -1
+                    avg_power = float(avg_power)
+                    targetpower = float(targetpower)
+                    max_power = float(targetpower + spec_pwr)
+                    delta_power = avg_power - targetpower
+                    delta_power = '{:.3f}'.format(delta_power)
+                    delta_power = float(delta_power)
+                    print('Default Measurer Power:', avg_power, 'Target Power:', targetpower, 'Delta Power:',
+                          delta_power)
+                    # power is nomal but some is fail
+                    if targetpower <= avg_power <= max_power:
+                        if result_evm == 'Fail' or result_symbol_clock_error == 'Fail' or result_lo_leakage == 'Fail' \
+                                or result_mask == 'Fail':
+                            print(Fore.RED + 'TX\'s quality are failed!' + Style.RESET_ALL)
                         else:
-                            adj = 1
-                        c = c + 1
-                        print('NEW VALUE(HEX):', channel_groups, pwr_paras)
-                        gain = dt.adjust_power()
-                        iq.read_data()
-                        avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask = \
-                            iq.get_data(mode, rate, channel, chain, result_name, targetpower, spec_pwr, gain, spec_evm,
-                                        evm_margin, spec_symbol_clock_error, spec_lo_leakage, spec_mask, spec_obw_20M,
-                                        spec_obw_40M)
+                            print('Get Good Result!')
+                    # power is not nomal
+                    else:
+                        low_power_counts = 0
+                        setup = 2
+                        setups = 2
+                        print('Step:', setup)
+                        pwr_paras = init_value + setup
+                        pwr_paras = hex(pwr_paras)
+                        pwr_paras = re.sub('0x', '', pwr_paras)
+                        get_power = []
+                        get_delta_power = []
+                        c = 1
                         get_power.append(avg_power)
                         print('Measurer Power List:', get_power)
-                        delta_power = float(avg_power) - targetpower
-                        delta_power = '{:.3f}'.format(delta_power)
-                        delta_power = float(delta_power)
-                        avg_power = float(avg_power)
-                        min_adj = avg_power - targetpower
-                        max_adj = avg_power - max_power
                         get_delta_power.append(delta_power)
                         print('Power Deviation List:', get_delta_power)
                         print('Adjust Counts:', c)
-                        adjust_status = get_delta_power[c - 1] - get_delta_power[c - 2]
-                        adjust_status = float('{:.3f}'.format(adjust_status))
-                        print('Power Added:', adjust_status)
-                        if adjust_status < 0.1:
-                            adjust_result = 'Pass'
-                            setup = 2*setups*adj
-                            low_power_counts = low_power_counts + 1
-                        elif adjust_status > 0.1:
-                            adjust_status = 'Pass'
-                            setup = 2*adj
-                        #print(low_power_counts)
-                        if low_power_counts > 5:
-                            print(Fore.RED + 'Power added was too small, Power adjust stop' + Style.RESET_ALL)
-                            adjust_result = 'Fail'
-                        else:
-                            print('Step:', setup)
-                            pwr_paras = int(pwr_paras, 16)
-                            pwr_paras = int(pwr_paras) + setup
-                            pwr_paras = hex(pwr_paras)
-                            pwr_paras = re.sub('0x', '', pwr_paras)
-                            print(result_evm, result_symbol_clock_error, result_lo_leakage, result_mask)
-                            print('*************************************************************')
+                        # ADJUST
+                        min_adj = avg_power - targetpower
+                        max_adj = avg_power - max_power
+                        while min_adj < 0 or max_adj > 0:
+                            print(Fore.GREEN + 'Adjust...' + Style.RESET_ALL)
+                            if avg_power > max_power:
+                                adj = -1
+                            else:
+                                adj = 1
+                            c = c + 1
+                            print('NEW VALUE(HEX):', channel_groups, pwr_paras)
+                            gain = dt.adjust_power()
+                            iq.read_data()
+                            avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask = \
+                                iq.get_data(mode, rate, channel, chain, tx_result_name , targetpower, spec_pwr, gain,
+                                            spec_evm,
+                                            evm_margin, spec_symbol_clock_error, spec_lo_leakage, spec_mask,
+                                            spec_obw_20M,
+                                            spec_obw_40M)
+                            get_power.append(avg_power)
+                            print('Measurer Power List:', get_power)
+                            delta_power = float(avg_power) - targetpower
+                            delta_power = '{:.3f}'.format(delta_power)
+                            delta_power = float(delta_power)
+                            avg_power = float(avg_power)
+                            min_adj = avg_power - targetpower
+                            max_adj = avg_power - max_power
+                            get_delta_power.append(delta_power)
+                            print('Power Deviation List:', get_delta_power)
+                            print('Adjust Counts:', c)
+                            adjust_status = get_delta_power[c - 1] - get_delta_power[c - 2]
+                            adjust_status = float('{:.3f}'.format(adjust_status))
+                            print('Power Added:', adjust_status)
+                            if adjust_status < 0.1:
+                                adjust_result = 'Pass'
+                                setup = 2 * setups * adj
+                                low_power_counts = low_power_counts + 1
+                            elif adjust_status > 0.1:
+                                adjust_status = 'Pass'
+                                setup = 2 * adj
+                            # print(low_power_counts)
+                            if low_power_counts > 5:
+                                print(Fore.RED + 'Power added was too small, Power adjust stop' + Style.RESET_ALL)
+                                adjust_result = 'Fail'
+                            else:
+                                print('Step:', setup)
+                                pwr_paras = int(pwr_paras, 16)
+                                pwr_paras = int(pwr_paras) + setup
+                                pwr_paras = hex(pwr_paras)
+                                pwr_paras = re.sub('0x', '', pwr_paras)
+                                print(result_evm, result_symbol_clock_error, result_lo_leakage, result_mask)
+                                print('*************************************************************')
+            else:
+                per_list = []
+                sens_list = []
+                print('Start: ' + str(start) + 'Stop: ' + str(stop))
+                # loss = iq.read_pathloss(channel, chain)
+                dt.rx(mode, channel, bw, rates, chain)
+                iq.vsg()
+                per = dt.get_statistics()
+                per = int(per)
+                per_list.append(per)
+                sens_list.append(start)
+                while start > stop and per >= int(per_spec):
+                    start = start - 1
+                    # dt.rx(mode, channel, bw, rates, chain)
+                    iq.vsg()
+                    time.sleep(sleep_time)
+                    per = dt.get_statistics()
+                    per = int(per)
+                    per_list.append(per)
+                    sens_list.append(start)
+                print(len(per_list) + str(per_list))
+                print(len(sens_list) + str(sens_list))
+                per = per_list[len(per_list) - 2]
+                sens = sens_list[len(sens_list) - 2]
+                if per < per_spec:
+                    result = 'Fail'
+                else:
+                    result = 'Pass'
+                with open('./Result/' + rx_result_name, 'a+', newline='') as f2:
+                    writer2 = csv.writer(f2)
+                    writer2.writerow([channel, rate, chain, sens, per, result])
+                print('*************************************************************')
+    print('************************TEST DONE****************************')
     dt.close()
     iq.close()
