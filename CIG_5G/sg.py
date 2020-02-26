@@ -53,46 +53,38 @@ class SG:
         idn = self.instance.query('*IDN?')
         logger.info(idn)
 
-    def ss(self):
-        print
-        'INIT SG...'
-        Host = sg_ip
-        Port = 5023
-        tn = telnetlib.Telnet(Host, Port, timeout=3)
-        tn.set_debuglevel(0);
-        tn.read_until(b"SCPI>")
-        n = tn.write(b"\r\n")
-        tn.read_until(b"SCPI>")
-        n = tn.write(b":SYST:PRES" + b"\r\n")
-        # tn.read_until(b"SCPI>")
-        # n = tn.write(b":RAD:ARB:TRIG:TYPE:CONT TRIG" + b"\r\n") #设置Trigger Type
-        # tn.read_until(b"SCPI>")
-        # n = tn.write(b":RAD:ARB:TRIG:EXT:SLOP POS" + b"\r\n") #设置EXT Polarity
-        # tn.read_until(b"SCPI>")
-        # n = tn.write(b":RAD:ARB:TRIG:EXT:DEL:STAT ON" + b"\r\n") #打开时延
-        # tn.read_until(b"SCPI>")
-        # n = tn.write(b":RAD:ARB:TRIG:EXT:DEL 11usec" + b"\r\n") #设置时延时间
-        ######################################################################
-        Keysight_Set.SA(ip, type)
-        ##################信号源设置########################################################
-        print
-        "**************** Starting Test ********************"
-        n = tn.write(b"\r\n")
-        tn.read_until(b"SCPI>")
-        n = tn.write(b":RAD:ARB:WAV " + wavef + b"\r\n")  # 加载波形文件
-        tn.read_until(b"SCPI>")
-        n = tn.write(b":RAD:ARB ON" + b"\r\n")  # 打开ARB开关
-        tn.read_until(b"SCPI>")
-        n = tn.write(b":FREQ:FIX " + channel + "MHz" + b"\r\n")  # 配置信道
-        tn.read_until(b"SCPI>")
-        n = tn.write(b":OUTP:MOD ON" + b"\r\n")  # 打开mode开关
-        tn.read_until(b"SCPI>")
-        n = tn.write(b":OUTP ON" + b"\r\n")  # 打开RF 开关
-        tn.read_until(b"SCPI>")
-        n = tn.write(b":POW:OFFS " + pathloss + "dBm" + b"\r\n")
-        tn.read_until(b"SCPI>")
-        x = 0
-        while (starf <= stopf):
-            rsamp = float(starf)  ####################设置测试初始信号强度
-            n = tn.write(b":POW " + str(rsamp) + "dBm" + b"\r\n")
-            tn.read_until(b"SCPI>")
+    def freq(self, channel):
+        channels = float(channel)*1000000
+        self.instance.write('FREQ:FIX %sHz' % channels)
+
+    def amptd(self, pathloss, amp):
+        self.instance.write('POW:OFFS %sdBm' % pathloss)
+        self.instance.write('POW %sdBm' % str(amp))
+
+    def rf_on(self):
+        self.instance.write('OUTP ON')
+
+    def rf_off(self):
+        self.instance.write('OUTP OFF')
+
+    def mod_on(self, wave):
+        self.instance.write('RAD:ARB:WAV %s' % wave)
+        self.instance.write('RAD:ARB ON')
+        self.instance.write('OUTP:MOD ON')
+
+    def mod_off(self):
+        self.instance.write('OUTP:MOD OFF')
+
+
+if __name__ == '__main__':
+    sg = SG('192.168.1.240')
+    sg.reset()
+    sg.read_idn
+    sg.freq(2412)
+    sg.amptd(5, 8)
+    sg.rf_on()
+    sg.mod_off()
+    sg.mod_on('"TDD_ETM31_20M.WFM"')
+    sg.close()
+
+

@@ -36,27 +36,26 @@ if __name__ == '__main__':
     now_time = time.strftime("%Y%m%d%H%M%S", time.localtime())
 
     # log
-    logger.setLevel(logging.DEBUG)  # logger的总开关，只有大于Debug的日志才能被logger对象处理
+    logger.setLevel(logging.DEBUG)  # logger level
 
-    # 第二步，创建一个handler，用于写入日志文件
+    #  create a handler，for log.txt
     file_handler = logging.FileHandler('./log/log_' + now_time + '.txt', mode='w')
     file_handler.setLevel(logging.DEBUG)  # 输出到file的log等级的开关
-    # 创建该handler的formatter
+    # log formatter
     file_handler.setFormatter(
         logging.Formatter(
             fmt='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S')
     )
-    # 添加handler到logger中
+    # add handler to logger
     logger.addHandler(file_handler)
 
-    # 第三步，创建一个handler，用于输出到控制台
+    # create a handler，for output to screen
     console_handler = logging.StreamHandler()
     if LOG_ENABLE == '1':
-        console_handler.setLevel(logging.DEBUG)  # 输出到控制台的log等级的开关
+        console_handler.setLevel(logging.DEBUG)  # log level
     else:
-        console_handler.setLevel(logging.INFO)  # 输出到控制台的log等级的开关
-    # 创建该handler的formatter
+        console_handler.setLevel(logging.INFO)  # log level
     console_handler.setFormatter(
         logging.Formatter(
             fmt='%(asctime)s - %(levelname)s: %(message)s',
