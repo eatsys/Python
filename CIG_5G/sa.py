@@ -4,9 +4,8 @@
 
 __author__ = 'Ethan'
 
+from logging import getLogger as logger
 import visa
-import logging
-logger = logging.getLogger()
 
 
 class SA:
@@ -34,7 +33,7 @@ class SA:
         format_spec = '{:.3f}'.format(format_spec)
         return format_spec
 
-    def save_image(self, imgname, fmt):
+    def save_image(self, imagname, fmt):
         """
         if save image
         :param imagname:
@@ -42,8 +41,8 @@ class SA:
         :return:
         """
         assert fmt in ['jpg', 'png'], 'Invalid postfix of image'
-        logger.debug('MMEM:STOR:IMAG "%s.%s"' % (imgname, fmt))
-        self.instance.write('MMEM:STOR:IMAG "%s.%s"' % (imgname, fmt))
+        logger.debug('MMEM:STOR:IMAG "%s.%s"' % (imagname, fmt))
+        self.instance.write('MMEM:STOR:IMAG "%s.%s"' % (imagname, fmt))
 
     def reset(self):
         self.instance.write('*RST')
@@ -53,10 +52,7 @@ class SA:
         idn = self.instance.query('*IDN?')
         logger.info(idn)
 
-    def freq(self, channel):
-        self.instance.write('CCAR:REF %sMHz' % channel)
-
-    def power(self, channel, bw):
+    def power(self):
         self.instance.write('CONF:CHP')
         self.instance.write('INIT:CHP')
         self.instance.write('CHP:AVER:COUN 15')
@@ -68,7 +64,7 @@ class SA:
         self.instance.write('CALC:DATA1?')
         self.instance.write('MMEM:STOR:SCR')
 
-    def evm(self, channel, bw, tbl, mcs):
+    def evm(self):
         self.instance.write('CONF:EVM')
         self.instance.write('INIT:EVM')
         self.instance.write('SERV:EVM:PHA:COMP 0')
@@ -86,7 +82,7 @@ class SA:
         self.instance.write('CCALC:CLIM:FAIL?')
         self.instance.write('MMEM:STOR:SCR')
 
-    def aclr(self, channel, bw):
+    def aclr(self):
         self.instance.write('CONF:ACP')
         self.instance.write('INIT:ACP')
         self.instance.write('CCAR:REF %sMHz' % channel)
@@ -98,7 +94,7 @@ class SA:
         self.instance.write('CCALC:CLIM:FAIL?')
         self.instance.write('MMEM:STOR:SCR')
 
-    def obue(self, channel, bw):
+    def obue(self):
         self.instance.write('CONF:SEM')
         self.instance.write('INIT:SEM')
         self.instance.write('SEM:AVER ON')
@@ -111,7 +107,7 @@ class SA:
         self.instance.write('CCALC:CLIM:FAIL?')
         self.instance.write('MMEM:STOR:SCR')
 
-    def obw(self, channel, bw):
+    def obw(self):
         self.instance.write('CONF:OBW')
         self.instance.write('INIT:OBW')
         self.instance.write('SEM:AVER ON')
@@ -152,7 +148,7 @@ class SA:
         self.instance.write('MMEM:STOR:SCR')
         self.instance.write('INIT:CONT ON')
 
-    def ccdf(self, channel, bw):
+    def ccdf(self):
         self.instance.write('CONF:PST')
         self.instance.write('PST:COUN 2000000')
         self.instance.write('CCAR:REF %sMHz' % channel)
@@ -165,9 +161,4 @@ class SA:
 
 
 if __name__ == '__main__':
-    sa = SA('192.168.100.55')
-    sa.reset()
-    sa.read_idn
-    sa.freq(2412)
-    sa.ccdf(2412, 20)
-    sa.close()
+    pass
