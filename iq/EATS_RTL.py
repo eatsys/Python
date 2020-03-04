@@ -4,7 +4,6 @@
 
 __author__ = 'Ethan'
 
-
 from __future__ import division
 from openpyxl import load_workbook
 from colorama import init, Fore, Style
@@ -84,425 +83,74 @@ class DUT:
             return False
 
     def init(self, str1, str2, str3):
-        self.tn.read_until(b'> ', timeout=1)
+        self.tn.read_until(b'ONT>', timeout=1)
         self.tn.write(str1.encode('ascii') + b'\n')
 
-        self.tn.read_until(b'# ', timeout=1)
+        self.tn.read_until(b'#ONT>', timeout=1)
         self.tn.write(str2.encode('ascii') + b'\n')
 
-        self.tn.read_until(b'# ', timeout=1)
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
         self.tn.write(str3.encode('ascii') + b'\n')
-        # self.tn.read_until(b'# ', timeout=1)
-        # self.tn.write(b'\r\n')
-        # time.sleep(5)
-
-        # self.tn.read_until(b'#', timeout=1)
-        # self.tn.write(str4.encode('ascii') + b'\n')
-        # # self.tn.read_until(b'#', timeout=1)
-        # # self.tn.write(b'\r\n')
-        # # time.sleep(5)
-
-    def ex_command(self, command):
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(command.encode('ascii') + b'\n')
-        time.sleep(2)
-        command_result = self.tn.read_very_eager().decode('ascii')
-        logging.info('\n%s' % command_result)
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'\r\n')
+        time.sleep(5)
 
     def tx(self):
         if int(channel) < 5000:
             band = ID_2G
-            bands = '2'
-            bandl = 'b'
+            xcap = xcap_24
         elif int(channel) < 5500:
             band = ID_5G_LOW
-            bands = '5'
-            bandl = 'a'
+            xcap = xcap_5
         else:
             band = ID_5G_HIGH
-            bands = '5'
-            bandl = 'a'
-        # for 2.4g
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s mpc 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s country ALL\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s wsec 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s stbc_rx 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s scansuppress 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s band auto\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s channels\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s txbf 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s up\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_rxchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s spect 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ibss_gmode -1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phytype\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s bw_cap 5g 255\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s bw_cap 2g 3\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s mbss 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s frameburst 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ampdu 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s gmode\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s gmode auto\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s up\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s PM 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s longpkt 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s pkteng_maxlen\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s stbc_tx 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s bi 65535\n' % band.encode('ascii'))
-        if int(bw) == 40:
-            bws = '4'
+            xcap = xcap_5
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'\r\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_ctx stop' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s set_mib mp_specific=1' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'ifconfig wlan%s down' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'ifconfig wlan%s up' % band.encode('ascii') + b'\n')
+        time.sleep(3)
+        self.tn.read_until(b'#ONT/system/shell>', timeout=5)
+        self.tn.write(b'iwpriv wlan%s mp_start' % band.encode('ascii') + b'\n')
+        if bw == '40':
+            bws = 1
+        elif bw == '20':
+            bws = 0
         else:
-            bws = '-1'
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s mimo_txbw %s\n' % (band.encode('ascii'), bws.encode('ascii')))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ldpc_cap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s 2g_rate auto\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s 5g_rate auto\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ampdu 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s frameburst 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s txchain 15\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s rxchain 15\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_rxchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_rxchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_rxchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s spatial_policy 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s stbc_tx\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        # (11b:wl -i wl0 txcore  -k 2)
-        # (11g:wl -i wl0 txcore  -o 1)
-        # (11n:wl -i wl0 txcore  -s 1 -c 1)
-        # (11ac:wl -i wl0 txcore  -s 1 -c 1)
-        # (11ax:wl -i wl0 txcore  -s 1 -c 1)
-        if mode == '11b':
-            chains = 'k'
-            addtional_chain = ''
-        elif mode == '11g' or mode == '11a':
-            chains = 'o'
-            addtional_chain = ''
-        elif mode == '11n' or mode == '11ac' or mode == '11ax':
-            chains = 'c'
-            addtional_chain = '-s 1'
-        else:
-            # logger.info('no mode')
-            print('mode error', mode)
-            exit(-1)
-        if str(chain) == '0':
-            chain_value = '1'
-        elif str(chain) == '1':
-            chain_value = '2'
-        elif str(chain) == '2':
-            chain_value = '4'
-        elif str(chain) == '3':
-            chain_value = '8'
-        else:
-            # logger.info('wrong chain')
-            print('chain error')
-            exit(-1)
-        self.tn.write(b'wl -i wl%s txcore %s -%s %s\n' % (band.encode('ascii'), addtional_chain.encode('ascii'),
-                                                          chains.encode('ascii'), chain_value.encode('ascii')))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_rxchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_watchdog\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_watchdog 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s chanspec\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s band %s\n' % (band.encode('ascii'), bandl.encode('ascii')))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s vht_features 3\n' % band.encode('ascii'))
+            bws = 2
         if int(channel) < 5000:
             channels = '{:.0f}'.format((int(channel) - 2407) / 5)
-            if bw == '40':
-                bw_channel = '40l'
-            else:
-                bw_channel = bw
         else:
             channels = '{:.0f}'.format((int(channel) - 5000) / 5)
-            bw_channel = bw
-        if bw == '40':
-            channels = int(channels) - 2
-        elif bw == '80':
-            channels = int(channels) - 6
-        elif bw == '160':
-            channels = int(channels) - 14
         channels = str(channels)
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s chanspec %s/%s\n' % (band.encode('ascii'), channels.encode('ascii'),
-                                                        bw_channel.encode('ascii')))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s up\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_watchdog\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_forcecal 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_activecal\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_watchdog\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid test2\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s he cap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s he features 7\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s he cap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ampdu_rts 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ldpc_cap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s sgi_tx\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        # (11g:2g_rate -r 6 -b 20)
-        # (11n:2g_rate -h 0 --ldpc -b 20)
-        # (11ac:2g_rate -v 0 -s 1 --ldpc -b 20)
-        # (11ax:2g_rate -e 0 -s 1 -i 1 --ldpc -b 20)
-        if mode == '11b' or mode == '11g' or mode == '11a':
-            ratess = 'r'
-            addtional = ''
-        elif mode == '11n':
-            ratess = 'h'
-            addtional = '--ldpc'
-        elif mode == '11ac':
-            ratess = 'v'
-            addtional = '-s 1 --ldpc'
-        elif mode == '11ax':
-            ratess = 'e'
-            addtional = '-s 1 -i 0 --ldpc'
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_channel %s' % (band.encode('ascii'), channels.encode('ascii')) + b'\n')
+        if chain == '0':
+            chains = 'a'
         else:
-            # logger.info('no mode')
-            exit(-1)
-        self.tn.write(b'wl -i wl%s %sg_rate -%s %s %s -b %s\n' % (band.encode('ascii'), bands.encode('ascii'),
-                                                                  ratess.encode('ascii'), rates.encode('ascii'),
-                                                                  addtional.encode('ascii'), bw.encode('ascii')))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_txpwrctrl 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s up\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s pkteng_stop rx\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s pkteng_stop tx\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s txpwr1 -d -o %d\n' % (band.encode('ascii'), gain))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s longpkt 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_watchdog\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_forcecal 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_activecal\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s cur_etheraddr\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s pkteng_stop rx\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s pkteng_stop tx\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s mpc 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s interference\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s interference_override 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s pkteng_maxlen\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(
-            b'wl -i wl%s pkteng_start 00:11:22:33:44:55 tx 650 1500 0 00:90:4C:1F:D0:10\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
+            chains = 'b'
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_ant_tx %s' % (band.encode('ascii'), chains.encode('ascii')) + b'\n')
+        if mode == '11b' or mode == '11g' or mode == '11a':
+            rates = int(rate) * 2
+        elif bw == '80':
+            rates = int(rate) + 144
+        else:
+            rates = int(rate) + 128
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_rate %d' % (band.encode('ascii'), rates) + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_bandwidth 40M=%d,shortGI=0' % (band.encode('ascii'), bws) + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_phypara xcap=%d' % (band.encode('ascii'), xcap) + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_ctx background,pkt' % band.encode('ascii') + b'\n')
         print('TX COMMANDS DONE')
 
     def get_paras(self):
@@ -525,26 +173,8 @@ class DUT:
             band = ID_5G_LOW
         else:
             band = ID_5G_HIGH
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s pkteng_stop rx\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s pkteng_stop tx\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s interference_override 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_watchdog 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s longpkt 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'ifconfig wlan%s down' % band.encode('ascii') + b'\n')
 
     def adjust_power(self, gain):
         if int(channel) < 5000:
@@ -553,345 +183,73 @@ class DUT:
             band = ID_5G_HIGH
         else:
             band = ID_5G_LOW
-        self.tn.read_until(b'# ', timeout=1)
-        # self.tn.write(b'iwpriv wlan%s mp_txpower patha=%d,pathb=%d' % (band.encode('ascii'), pwra_paras, pwrb_paras) + b'\n')
-        self.tn.write(b'wl -i wl%s txpwr1 -q -o %d\n' % (band.encode('ascii'), gain))
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(
+            b'iwpriv wlan%s mp_txpower patha=%d,pathb=%d' % (band.encode('ascii'), gain, gain) + b'\n')
 
     def rx(self):
         if int(channel) < 5000:
             band = ID_2G
-            bands = '2'
-            bandl = 'b'
+            xcap = xcap_24
         elif int(channel) < 5500:
             band = ID_5G_LOW
-            bands = '5'
-            bandl = 'a'
+            xcap = xcap_5
         else:
             band = ID_5G_HIGH
-            bands = '5'
-            bandl = 'a'
-        # for 2.4g
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s mpc 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s country ALL\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s wsec 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s stbc_rx 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s scansuppress 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s band auto\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s channels\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s txbf 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s up\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_rxchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s spect 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ibss_gmode -1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phytype\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s bw_cap 5g 255\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s bw_cap 2g 3\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s mbss 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s frameburst 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ampdu 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s gmode\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s gmode auto\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s up\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s PM 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s longpkt 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s pkteng_maxlen\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s stbc_tx 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s bi 65535\n' % band.encode('ascii'))
-        if int(bw) == 40:
-            bws = '4'
+            xcap = xcap_5
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'\r\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_ctx stop' % band.encode('ascii'))
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s set_mib mp_specific=1' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'ifconfig wlan%s down' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'ifconfig wlan%s up' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=5)
+        self.tn.write(b'iwpriv wlan%s mp_start' % band.encode('ascii') + b'\n')
+        if bw == '40':
+            # channels = int(channel) - 10
+            bws = 1
+            # print(channel)
+        elif bw == '20':
+            # channels = channel
+            bws = 0
         else:
-            bws = '-1'
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s mimo_txbw %s\n' % (band.encode('ascii'), bws.encode('ascii')))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ldpc_cap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s 2g_rate auto\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s 5g_rate auto\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ampdu 0\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s frameburst 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s txchain 15\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s rxchain 15\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_rxchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_rxchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_rxchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s spatial_policy 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s stbc_tx\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        # (11b:wl -i wl0 txcore  -k 2)
-        # (11g:wl -i wl0 txcore  -o 1)
-        # (11n:wl -i wl0 txcore  -s 1 -c 1)
-        # (11ac:wl -i wl0 txcore  -s 1 -c 1)
-        # (11ax:wl -i wl0 txcore  -s 1 -c 1)
-        if mode == '11b':
-            chains = 'k'
-            addtional_chain = ''
-        elif mode == '11g' or mode == '11a':
-            chains = 'o'
-            addtional_chain = ''
-        elif mode == '11n' or mode == '11ac' or mode == '11ax':
-            chains = 'c'
-            addtional_chain = '-s 1'
-        else:
-            # logger.info('no mode')
-            exit(-1)
-        if str(chain) == '0':
-            chain_value = '1'
-        elif str(chain) == '1':
-            chain_value = '2'
-        elif str(chain) == '2':
-            chain_value = '4'
-        elif str(chain) == '3':
-            chain_value = '8'
-        else:
-            # logger.info('wrong chain')
-            exit(-1)
-        self.tn.write(b'wl -i wl%s txcore %s -%s %s\n' % (band.encode('ascii'), addtional_chain.encode('ascii'),
-                                                          chains.encode('ascii'), chain_value.encode('ascii')))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s rxchain %s\n' % (band.encode('ascii'), chain_value.encode('ascii')))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_txchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s hw_rxchain\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_watchdog\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s band %s\n' % (band.encode('ascii'), bandl.encode('ascii')))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s vht_features 3\n' % band.encode('ascii'))
+            bws = 2
         if int(channel) < 5000:
             channels = '{:.0f}'.format((int(channel) - 2407) / 5)
-            if bw == '40':
-                bw_channel = '40l'
-            else:
-                bw_channel = bw
         else:
             channels = '{:.0f}'.format((int(channel) - 5000) / 5)
-            bw_channel = bw
-        if bw == '40':
-            channels = int(channels) - 2
-        elif bw == '80':
-            channels = int(channels) - 6
-        elif bw == '160':
-            channels = int(channels) - 14
         channels = str(channels)
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s chanspec %s/%s\n' % (band.encode('ascii'), channels.encode('ascii'),
-                                                        bw_channel.encode('ascii')))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s up\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_watchdog\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_forcecal 1\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_activecal\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s phy_watchdog\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid test2\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ldpc_cap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s sgi_tx\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s he cap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s he cap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        # (11g:2g_rate -r 6 -b 20)
-        # (11n:2g_rate -h 0 --ldpc -b 20)
-        # (11ac:2g_rate -v 0 -s 1 --ldpc -b 20)
-        # (11ax:2g_rate -e 0 -s 1 -i 1 --ldpc -b 20)
-        if mode == '11b' or mode == '11g' or mode == '11a':
-            ratess = 'r'
-            addtional = ''
-        elif mode == '11n':
-            ratess = 'h'
-            addtional = '--ldpc'
-        elif mode == '11ac':
-            ratess = 'v'
-            addtional = '-s 1 --ldpc'
-        elif mode == '11ax':
-            ratess = 'e'
-            addtional = '-s 1 -i 1 --ldpc'
+        # print(channel)
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_channel %s' % (band.encode('ascii'), channels.encode('ascii')) + b'\n')
+        if chain == '0':
+            chains = 'a'
         else:
-            # logger.info('no mode')
-            exit(-1)
-        self.tn.write(b'wl -i wl%s %sg_rate -%s %s %s -b %s\n' % (band.encode('ascii'), bands.encode('ascii'),
-                                                                  ratess.encode('ascii'), rates.encode('ascii'),
-                                                                  addtional.encode('ascii'), bw.encode('ascii')))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s counters --nz --rx --ucode\n' % band.encode('ascii'))
+            chains = 'b'
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_ant_tx %s' % (band.encode('ascii'), chains.encode('ascii')) + b'\n')
+        logger.debug(mode)
+        if mode == '11b' or mode == '11g' or mode == '11a':
+            rates = int(rate) * 2
+        else:
+            rates = int(rate) + 128
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_rate %d' % (band.encode('ascii'), rates) + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_bandwidth 40M=%d,shortGI=0' % (band.encode('ascii'), bws) + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_phypara xcap=%d' % (band.encode('ascii'), xcap) + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_arx stop' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_arx start' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_query' % band.encode('ascii') + b'\n')
         print('RX COMMANDS DONE')
-
-    # def get_statistics(self):
-    #     if int(channel) < 5000:
-    #         band = ID_2G
-    #     elif int(channel) > 5499:
-    #         band = ID_5G_HIGH
-    #     else:
-    #         band = ID_5G_LOW
-    #     self.tn.read_until(b'# ', timeout=1)
-    #     self.tn.write(b'wl -i wl%s counters --rx --ucode\n' % band.encode('ascii'))
-    #     command_result = self.tn.read_until(b'# ', timeout=2)
-    #     # print(command_result)
-    #     time.sleep(1)
-    #     if bw == '160':
-    #         rx_counts = re.findall(b'rxstrt(.\d+)', command_result)[0].split()[0].decode('utf-8')
-    #     else:
-    #         rx_counts = re.findall(b'rxdtocast(.\d+)', command_result)[0].split()[0].decode('utf-8')
-    #     logger.info('Packets: ' + RX_PACKETS + ' Packets Counts: ' + rx_counts)
-    #     return rx_counts
 
     def get_statistics(self):
         if int(channel) < 5000:
@@ -900,13 +258,37 @@ class DUT:
             band = ID_5G_HIGH
         else:
             band = ID_5G_LOW
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s counters --rx --ucode\n' % band.encode('ascii'))
-        command_result = self.tn.read_until(b'# ', timeout=2)
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_query' % band.encode('ascii') + b'\n')
+        command_result = self.tn.read_until(b', CRC', timeout=2)
         # print(command_result)
-        time.sleep(1)
-        rx_counts = re.findall(b'rxdtocast(.\d+)', command_result)[0].split()[0].decode('utf-8')
-        logger.info('Packets: ' + RX_PACKETS + ' Packets Counts: ' + rx_counts)
+        command_result = re.search(b'Rx OK:\w+', command_result)
+        # print(command_result)
+        # print(command_result.group())
+        rx_counts = re.sub('Rx OK:', '', command_result.group().decode('ascii'))
+        logger.info('Packets: ' + RX_PACKETS + 'Packets Counts: ' + rx_counts)
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_arx stop' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_query' % band.encode('ascii') + b'\n')
+        # command_result = self.tn.read_until(b'CRC', timeout=2)
+        # print(command_result)
+        # command_result = re.search(b'Rx OK:\w+', command_result)
+        # print(command_result)
+        # print(command_result.group())
+        # PER1_value = re.sub('Rx OK:', '', command_result.group().decode('ascii'))
+        # print('PER1:', PER1_value)
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_arx start' % band.encode('ascii') + b'\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'iwpriv wlan%s mp_query' % band.encode('ascii') + b'\n')
+        # command_result = self.tn.read_until(b'CRC', timeout=2)
+        # print(command_result)
+        # command_result = re.search(b'Rx OK:\w+', command_result)
+        # print(command_result)
+        # print(command_result.group())
+        # PER2_value = re.sub('Rx OK:', '', command_result.group().decode('ascii'))
+        # print('PER2:', PER2_value)
         return rx_counts
 
     def rx_off(self):
@@ -916,19 +298,12 @@ class DUT:
             band = ID_5G_LOW
         else:
             band = ID_5G_HIGH
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ap\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s ssid ""\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s down\n' % band.encode('ascii'))
-        self.tn.read_until(b'# ', timeout=1)
-        self.tn.write(b'wl -i wl%s isup\n' % band.encode('ascii'))
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'ifconfig wlan%s down' % band.encode('ascii') + b'\n')
 
     def set_default(self):
-        self.tn.write(b'wl -i wl0 down\r\n')
-        self.tn.write(b'wl -i wl1 down\r\n')
-        self.tn.write(b'wl -i wl2 down\r\n')
+        self.tn.read_until(b'#ONT/system/shell>', timeout=1)
+        self.tn.write(b'ifconfig wlan%s down' % band.encode('ascii') + b'\n')
 
 
 if __name__ == '__main__':
@@ -1860,7 +1235,7 @@ if __name__ == '__main__':
                 iq_wanted.vsg(mw_iq, mode, bw, rates, channel, start)
                 counts = dt.get_statistics()
                 rx_counts.append(counts)
-                per = 1.0 - (float(rx_counts[-1]) - float(rx_counts[-2]))/float(RX_PACKETS)
+                per = 1.0 - (float(rx_counts[-1]) - float(rx_counts[-2])) / float(RX_PACKETS)
                 per = float(per)
                 per = '{:.3f}'.format(per)
                 logger.debug(per)
@@ -1879,7 +1254,7 @@ if __name__ == '__main__':
                         start = start - 1
                         # dt.rx(mode, channel, bw, rates, chain)
                         # dt.rx()
-                        iq_wanted.vsg(mw_iq,  mode, bw, rates, channel, start)
+                        iq_wanted.vsg(mw_iq, mode, bw, rates, channel, start)
                         time.sleep(0.2)
                         counts = dt.get_statistics()
                         rx_counts.append(counts)
@@ -1917,7 +1292,7 @@ if __name__ == '__main__':
                         start = start + 1
                         # dt.rx(mode, channel, bw, rates, chain)
                         # dt.rx()
-                        iq_wanted.vsg(mw_iq,  mode, bw, rates, channel, start)
+                        iq_wanted.vsg(mw_iq, mode, bw, rates, channel, start)
                         time.sleep(0.2)
                         counts = dt.get_statistics()
                         rx_counts.append(counts)
