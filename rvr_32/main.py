@@ -6,7 +6,6 @@
              空口及传导测试类型已增加
     """
 
-
 import logging
 import os
 import shutil
@@ -19,8 +18,8 @@ from config import Config, Con_current_atten, Con_current_angle
 from Throught import Throught
 from att import Attenuate
 from chariot import chariot_tx, chariot_rx
-from data.parameters import AP_TYPE, HOST_IP, RADIO, USER_NAME, PASSWORD, SSID, RADIO, CHANNEL, AP_COM, AP_BAUDRATE,\
-    STA_TYPE, STA_ADDRESS, STA_USERNAME, STA_PASSWORD, STA_SWITCHIP, STA_SWITCHPORT, ATTENUATE_LIST, ATTEN_NUM,\
+from data.parameters import AP_TYPE, HOST_IP, RADIO, USER_NAME, PASSWORD, SSID, RADIO, CHANNEL, AP_COM, AP_BAUDRATE, \
+    STA_TYPE, STA_ADDRESS, STA_USERNAME, STA_PASSWORD, STA_SWITCHIP, STA_SWITCHPORT, ATTENUATE_LIST, ATTEN_NUM, \
     ANGLE_LIST, ANGLE_NUM, TABLE_COM, RUN_TPYE
 from data.write_datas import channel_write, atten_write, angle_write, ap_rssi_write, tx_linkrate_write, \
     sta_rssi_write, rx_linkrate_write, mcs_txrate_write, mcs_rxrate_write, nss_txrate_write, nss_rxrate_write, \
@@ -105,14 +104,14 @@ def test():
         shutil.rmtree(ixchraiot_file)
         os.makedirs(ixchraiot_file)
     # set swivel table
-    #wait_table_time = set_swivel_table(ANGLE_NUM, TABLE_COM, 'clockwise')
+    # wait_table_time = set_swivel_table(ANGLE_NUM, TABLE_COM, 'clockwise')
     # # set sta type
     # swt = Switch(STA_SWITCHIP)
     # swt.set_default()
     # swt.set_switch_sta(STA_SWITCHPORT)
     # set run type OTA or Conductive
     swta = Switch('192.168.100.41')
-    #swta.set_default()
+    # swta.set_default()
     swta.set_switch_runtype()
     if ATTEN_NUM > 4:
         swtb = Switch('192.168.100.42')
@@ -122,6 +121,14 @@ def test():
     # set swivel counts
     swivel_count = 0
     for i in ATTENUATE_LIST:
+        if RUN_TPYE == '0' and int(CHANNEL) < 20:
+            i += 56
+        elif RUN_TPYE == '0' and int(CHANNEL) > 30:
+            i += 69
+        elif RUN_TPYE == '1' and int(channel) < 20:
+            i += 12
+        elif RUN_TPYE == '1' and int(CHANNEL) > 30:
+            i += 18
         logger.info(f'ATT:{i}')
         retval = os.getcwd()
         logger.info(f'path check:{retval}')
@@ -139,7 +146,7 @@ def test():
             pass
         elif ANGLE_NUM > 1 and swivel_count > 0:
             wait_table_time = set_swivel_table(ANGLE_NUM, TABLE_COM, 'counter')
-            #Controller()
+            # Controller()
             logger.info('Waiting for swivel table back to zero...')
             time.sleep(wait_table_time)
 
@@ -154,7 +161,7 @@ def test():
             if x == 0:
                 pass
             else:
-                #Controller()
+                # Controller()
                 wait_table_time = set_swivel_table(ANGLE_NUM, TABLE_COM, 'clockwise')
                 time.sleep(wait_table_time)
             # get RSSI and link rate info
@@ -217,7 +224,7 @@ def test():
                                      str(ap_rssi_chain4).strip() + str(ap_rssi_chain5).strip() +
                                      str(ap_rssi_chain6).strip() + str(ap_rssi_chain7).strip())
                     P_ap.close()
-                    
+
                 # main
                 # tx
                 P_sta = product_RSSI_telnet(STA_ADDRESS, STA_USERNAME, STA_PASSWORD, RADIO, AP_TYPE)
@@ -282,7 +289,8 @@ def test():
                     # get sta rssi
                     P_sta_rssi = product_RSSI_telnet(STA_ADDRESS, STA_USERNAME, STA_PASSWORD, RADIO, AP_TYPE)
                     P_sta_rssi.login(STA_USERNAME, STA_PASSWORD)
-                    sta_rssi, sta_rssi_ant0, sta_rssi_ant1, sta_rssi_ant2, sta_rssi_ant3 = P_sta_rssi.get_RSSI_bcm(RADIO)
+                    sta_rssi, sta_rssi_ant0, sta_rssi_ant1, sta_rssi_ant2, sta_rssi_ant3 = P_sta_rssi.get_RSSI_bcm(
+                        RADIO)
                     # write tx rssi and linkrate
                     # channel.write(str(channel).strip())
                     sta_rssi_write(str(sta_rssi).strip())
@@ -291,9 +299,11 @@ def test():
                     nss_txrate_write(str(ap_nss).strip())
                     bw_txrate_write(str(ap_bw).strip())
                     rssi_txant_write(
-                        str('rssi[0]' + sta_rssi_ant0 + ' ' + 'rssi[1]' + sta_rssi_ant1 + ' ' + 'rssi[2]' + sta_rssi_ant2
+                        str(
+                            'rssi[0]' + sta_rssi_ant0 + ' ' + 'rssi[1]' + sta_rssi_ant1 + ' ' + 'rssi[2]' + sta_rssi_ant2
                             + ' ' + 'rssi[3]' + sta_rssi_ant3))
-                    power_txant_write(str(ap_power_ant0 + ' ' + ap_power_ant1 + ' ' + ap_power_ant2 + ' ' + ap_power_ant3))
+                    power_txant_write(
+                        str(ap_power_ant0 + ' ' + ap_power_ant1 + ' ' + ap_power_ant2 + ' ' + ap_power_ant3))
                     P_ap_counts.close()
                     P_sta_rssi.close()
 
@@ -317,6 +327,7 @@ def test():
                                          ap_rssi_ant2 + ' ' + 'rssi[3]' + ap_rssi_ant3))
                     power_rxant_write(
                         str(sta_power_ant0 + ' ' + sta_power_ant1 + ' ' + sta_power_ant2 + ' ' + sta_power_ant3))
+
                 # MAIN
                 threads_tx = []
                 threads_tx.append(threading.Thread(target=chariot_tx))
@@ -340,7 +351,7 @@ def test():
             elif AP_TYPE == 'WF-8186' and STA_TYPE == 'ASUS':
                 def get_statistics_tx():
                     sta_rssi = ap_link_rate = ap_mcs = ap_nss = ap_bw = sta_rssi_ant0 = sta_rssi_ant1 = sta_rssi_ant2 \
-                        = sta_rssi_ant3 = ap_power_ant0 = ap_power_ant1 =ap_power_ant2 = ap_power_ant3 ='999'
+                        = sta_rssi_ant3 = ap_power_ant0 = ap_power_ant1 = ap_power_ant2 = ap_power_ant3 = '999'
                     # get AP's RSSI and link rate info
                     P_ap_counts = product_RSSI_telnet(HOST_IP, USER_NAME, PASSWORD, RADIO, AP_TYPE)
                     P_ap_counts.login(USER_NAME, PASSWORD)
@@ -356,14 +367,17 @@ def test():
                     nss_txrate_write(str(ap_nss).strip())
                     bw_txrate_write(str(ap_bw).strip())
                     rssi_txant_write(
-                        str('rssi[0]' + sta_rssi_ant0 + ' ' + 'rssi[1]' + sta_rssi_ant1 + ' ' + 'rssi[2]' + sta_rssi_ant2
+                        str(
+                            'rssi[0]' + sta_rssi_ant0 + ' ' + 'rssi[1]' + sta_rssi_ant1 + ' ' + 'rssi[2]' + sta_rssi_ant2
                             + ' ' + 'rssi[3]' + sta_rssi_ant3))
-                    power_txant_write(str(ap_power_ant0 + ' ' + ap_power_ant1 + ' ' + ap_power_ant2 + ' ' + ap_power_ant3))
+                    power_txant_write(
+                        str(ap_power_ant0 + ' ' + ap_power_ant1 + ' ' + ap_power_ant2 + ' ' + ap_power_ant3))
                     P_ap_counts.close()
-                    #P_sta_rssi.close()
+                    # P_sta_rssi.close()
+
                 def get_statistics_rx():
                     ap_rssi = sta_link_rate = sta_mcs = sta_nss = sta_bw = ap_rssi_ant0 = ap_rssi_ant1 = ap_rssi_ant2 \
-                        = ap_rssi_ant3 = sta_power_ant0 =sta_power_ant1 =sta_power_ant2 =sta_power_ant3 = '999'
+                        = ap_rssi_ant3 = sta_power_ant0 = sta_power_ant1 = sta_power_ant2 = sta_power_ant3 = '999'
                     # get station's rssi and linkrate
                     # P_sta_counts = product_RSSI_telnet(STA_ADDRESS, STA_USERNAME, STA_PASSWORD, RADIO, AP_TYPE)
                     # #P_sta_rssi.login(USER_NAME, PASSWORD)
@@ -384,6 +398,7 @@ def test():
                     power_rxant_write(
                         str(sta_power_ant0 + ' ' + sta_power_ant1 + ' ' + sta_power_ant2 + ' ' + sta_power_ant3))
                     P_ap_rssi.close()
+
                 threads_tx = []
                 threads_tx.append(threading.Thread(target=chariot_tx))
                 threads_tx.append(threading.Thread(target=get_statistics_tx))
@@ -657,7 +672,7 @@ def test():
                     #     RADIO)
                     # # write tx rssi and linkrate
                     sta_rssi = '999'
-                    sta_rssi_ant0 = sta_rssi_ant1 = sta_rssi_ant2 =sta_rssi_ant3 = '999'
+                    sta_rssi_ant0 = sta_rssi_ant1 = sta_rssi_ant2 = sta_rssi_ant3 = '999'
                     sta_rssi_write(str(sta_rssi).strip())
                     rssi_txant_write(
                         str(
@@ -753,7 +768,7 @@ def test():
                     get_channel, ap_radio_2g, ap_radio_5g = P_ap.get_testradio_hi()
                     sta_mac = P_ap.get_sta_mac(RADIO, ap_radio_2g, ap_radio_5g)
                     tx_link_rate = P_ap.get_txlinkrate(RADIO, ap_radio_2g, ap_radio_5g)
-                    sta_rssi = P_ap.get_starssi(RADIO,ap_radio_2g, ap_radio_5g, sta_mac)
+                    sta_rssi = P_ap.get_starssi(RADIO, ap_radio_2g, ap_radio_5g, sta_mac)
                     channel_write(str(get_channel))
                     tx_linkrate_write(str(tx_link_rate).strip())
                     ap_power = None

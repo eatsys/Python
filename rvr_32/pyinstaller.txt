@@ -1,0 +1,1 @@
+pyinstaller -F main.py --upx D:\work\Reamon\Python\upx -i D:\work\Reamon\Python\64.ico
