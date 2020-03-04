@@ -4,6 +4,7 @@
 """the main control, get the configure for entire test system
     2019.8.8 增加switch控制， STA类型还未使用，暂注释
              空口及传导测试类型已增加
+    2020.3.4 补充线损
     """
 
 import logging
