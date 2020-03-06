@@ -478,61 +478,7 @@ class IQxel:
             ramp_on_time = result_ramp_on_time = ramp_off_time = result_ramp_off_time = 'NA'
         return ramp_on_time, result_ramp_on_time, ramp_off_time, result_ramp_off_time
 
-    # def vsg(self, mw, mode, bw, rates, channel, rlevel):
-    #     # rint(mw, IQ_ROUT, IQ_PORT, IQ_ROUT)
-    #     self.instance.write('%sROUT%s;PORT:RES RF%s,VSG%s' % (mw, IQ_ROUT, IQ_PORT, IQ_ROUT))
-    #     self.instance.write('CHAN1;WIFI')
-    #     channels = int(channel) * 1000000
-    #     self.instance.write('%sVSG%s;FREQ:cent %d' % (mw, IQ_ROUT, channels))
-    #     if int(bw) > 80:
-    #         sampling_rate = 240000000
-    #     else:
-    #         sampling_rate = 160000000
-    #     self.instance.write('%sVSA%s;SRAT %d' % (mw, IQ_ROUT, sampling_rate))
-    #     # rlevel = start + loss
-    #     logger.debug(rlevel)
-    #     self.instance.write('%sVSG%s;POW:lev %d' % (mw, IQ_ROUT, rlevel))
-    #     self.instance.write('VSG1;POW:STAT ON')
-    #     self.instance.write('VSG1;MOD:STAT ON')
-    #     self.instance.write('VSG1;WAVE:EXEC OFF')
-    #     self.instance.write('VSG1;WLIS:COUN %d' % int(RX_PACKETS))
-    #     # wave = 'OFDM-6'
-    #     if mode == '11b' and rates == '1':
-    #         wave = 'DSSS-1'
-    #         vsg_delay = int(RX_PACKETS) / 100 + 5 - int(rates) * int(RX_PACKETS) / 1000
-    #     elif mode == '11b' and rates == '2':
-    #         wave = 'DSSS-2L'
-    #         vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1000
-    #     elif mode == '11b' and rates == '5.5':
-    #         wave = 'CCK-5_5S'
-    #         vsg_delay = int(RX_PACKETS) / 100 - int(float(rates) * int(RX_PACKETS) / 1000)
-    #     elif mode == '11b' and rates == '11':
-    #         wave = 'CCK-11S'
-    #         vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1800
-    #     elif mode == '11g' or mode == '11a':
-    #         wave = 'OFDM-' + rates
-    #         vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 6000
-    #     elif mode == '11n':
-    #         wave = 'HT' + bw + '_MCS' + rates
-    #         vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1000
-    #     elif mode == '11ac':
-    #         wave = '11AC_VHT' + bw + '_S1_MCS' + rates
-    #         vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1000
-    #     elif mode == '11ax':
-    #         wave = '11AX_HE' + bw + '_S1_HE' + rates
-    #         vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1200
-    #     # logger.info(wave)
-    #     logger.info('Delay Time:' + str(vsg_delay))
-    #     self.instance.write('VSG1; WAVE:LOAD "/user/WiFi_%s.iqvsg"' % wave)
-    #     self.instance.write('VSG1 ;wave:exec off')
-    #     self.instance.write('WLIST:WSEG1:DATA "/user/WiFi_%s.iqvsg"' % wave)
-    #     self.instance.write('wlist:wseg1:save')
-    #     self.instance.write('WLIST:COUNT:ENABLE WSEG1')
-    #     self.instance.write('WAVE:EXEC ON, WSEG1')
-    #     time.sleep(vsg_delay)
-    #     self.instance.write('VSG1 ;WAVE:EXEC OFF')
-    #     self.instance.write('WLIST:COUNT:DISABLE WSEG1')
-
+    # for normal rx sensitivity test
     def vsg(self, mw, mode, bw, rates, channel, rlevel):
         # rint(mw, IQ_ROUT, IQ_PORT, IQ_ROUT)
         self.instance.write('%sROUT%s;PORT:RES RF%s,VSG%s' % (mw, IQ_ROUT, IQ_PORT, IQ_ROUT))
@@ -553,7 +499,7 @@ class IQxel:
         self.instance.write('VSG1;WLIS:COUN %d' % int(RX_PACKETS))
         # wave = 'OFDM-6'
         if mode == '11b' and rates == '1':
-            wave = 'CCK_1_Fs160'
+            wave = 'DSSS-1'
             vsg_delay = int(RX_PACKETS) / 100 + 5 - int(rates) * int(RX_PACKETS) / 1000
         elif mode == '11b' and rates == '2':
             wave = 'DSSS-2L'
@@ -562,35 +508,91 @@ class IQxel:
             wave = 'CCK-5_5S'
             vsg_delay = int(RX_PACKETS) / 100 - int(float(rates) * int(RX_PACKETS) / 1000)
         elif mode == '11b' and rates == '11':
-            wave = 'CCK_11_Fs160'
+            wave = 'CCK-11S'
             vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1800
         elif mode == '11g' or mode == '11a':
-            wave = 'LEG' + rates + '_1500bytes_100us_Fs160'
+            wave = 'OFDM-' + rates
             vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 6000
         elif mode == '11n':
-            wave = 'MCS' + rates + '_HT' + bw + '_BCC_MM_LGI_1000bytes_PG100us_Fs160'
+            wave = 'HT' + bw + '_MCS' + rates
             vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1000
         elif mode == '11ac':
-            wave = 'MCS' + rates + '_NSS1_VHT' + bw + '_SGI_LDPC_MM_4000B_PG100us'
+            wave = '11AC_VHT' + bw + '_S1_MCS' + rates
             vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1000
         elif mode == '11ax':
-            if rates == '0':
-                length = '1000'
-            else:
-                length = '4000'
-            wave = 'HE' + rates + '_NSS1_HE' + bw + '_LDPC_' + length + 'b_PG100us_CPLTF1_PE2'
+            wave = '11AX_HE' + bw + '_S1_HE' + rates
             vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1200
         # logger.info(wave)
         logger.info('Delay Time:' + str(vsg_delay))
-        self.instance.write('VSG1; WAVE:LOAD "/user/%s.iqvsg"' % wave)
+        self.instance.write('VSG1; WAVE:LOAD "/user/WiFi_%s.iqvsg"' % wave)
         self.instance.write('VSG1 ;wave:exec off')
-        self.instance.write('WLIST:WSEG1:DATA "/user/%s.iqvsg"' % wave)
+        self.instance.write('WLIST:WSEG1:DATA "/user/WiFi_%s.iqvsg"' % wave)
         self.instance.write('wlist:wseg1:save')
         self.instance.write('WLIST:COUNT:ENABLE WSEG1')
         self.instance.write('WAVE:EXEC ON, WSEG1')
         time.sleep(vsg_delay)
         self.instance.write('VSG1 ;WAVE:EXEC OFF')
         self.instance.write('WLIST:COUNT:DISABLE WSEG1')
+
+    # # for LDPC
+    # def vsg(self, mw, mode, bw, rates, channel, rlevel):
+    #     # rint(mw, IQ_ROUT, IQ_PORT, IQ_ROUT)
+    #     self.instance.write('%sROUT%s;PORT:RES RF%s,VSG%s' % (mw, IQ_ROUT, IQ_PORT, IQ_ROUT))
+    #     self.instance.write('CHAN1;WIFI')
+    #     channels = int(channel) * 1000000
+    #     self.instance.write('%sVSG%s;FREQ:cent %d' % (mw, IQ_ROUT, channels))
+    #     if int(bw) > 80:
+    #         sampling_rate = 240000000
+    #     else:
+    #         sampling_rate = 160000000
+    #     self.instance.write('%sVSA%s;SRAT %d' % (mw, IQ_ROUT, sampling_rate))
+    #     # rlevel = start + loss
+    #     logger.debug(rlevel)
+    #     self.instance.write('%sVSG%s;POW:lev %d' % (mw, IQ_ROUT, rlevel))
+    #     self.instance.write('VSG1;POW:STAT ON')
+    #     self.instance.write('VSG1;MOD:STAT ON')
+    #     self.instance.write('VSG1;WAVE:EXEC OFF')
+    #     self.instance.write('VSG1;WLIS:COUN %d' % int(RX_PACKETS))
+    #     # wave = 'OFDM-6'
+    #     if mode == '11b' and rates == '1':
+    #         wave = 'CCK_1_Fs160'
+    #         vsg_delay = int(RX_PACKETS) / 100 + 5 - int(rates) * int(RX_PACKETS) / 1000
+    #     elif mode == '11b' and rates == '2':
+    #         wave = 'DSSS-2L'
+    #         vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1000
+    #     elif mode == '11b' and rates == '5.5':
+    #         wave = 'CCK-5_5S'
+    #         vsg_delay = int(RX_PACKETS) / 100 - int(float(rates) * int(RX_PACKETS) / 1000)
+    #     elif mode == '11b' and rates == '11':
+    #         wave = 'CCK_11_Fs160'
+    #         vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1800
+    #     elif mode == '11g' or mode == '11a':
+    #         wave = 'LEG' + rates + '_1500bytes_100us_Fs160'
+    #         vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 6000
+    #     elif mode == '11n':
+    #         wave = 'MCS' + rates + '_HT' + bw + '_BCC_MM_LGI_1000bytes_PG100us_Fs160'
+    #         vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1000
+    #     elif mode == '11ac':
+    #         wave = 'MCS' + rates + '_NSS1_VHT' + bw + '_SGI_LDPC_MM_4000B_PG100us'
+    #         vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1000
+    #     elif mode == '11ax':
+    #         if rates == '0':
+    #             length = '1000'
+    #         else:
+    #             length = '4000'
+    #         wave = 'HE' + rates + '_NSS1_HE' + bw + '_LDPC_' + length + 'b_PG100us_CPLTF1_PE2'
+    #         vsg_delay = int(RX_PACKETS) / 100 - int(rates) * int(RX_PACKETS) / 1200
+    #     # logger.info(wave)
+    #     logger.info('Delay Time:' + str(vsg_delay))
+    #     self.instance.write('VSG1; WAVE:LOAD "/user/%s.iqvsg"' % wave)
+    #     self.instance.write('VSG1 ;wave:exec off')
+    #     self.instance.write('WLIST:WSEG1:DATA "/user/%s.iqvsg"' % wave)
+    #     self.instance.write('wlist:wseg1:save')
+    #     self.instance.write('WLIST:COUNT:ENABLE WSEG1')
+    #     self.instance.write('WAVE:EXEC ON, WSEG1')
+    #     time.sleep(vsg_delay)
+    #     self.instance.write('VSG1 ;WAVE:EXEC OFF')
+    #     self.instance.write('WLIST:COUNT:DISABLE WSEG1')
 
     def vsg_aj(self, mw, mode, bw, rates, channel, rlevel):
         self.instance.write(

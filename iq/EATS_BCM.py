@@ -1258,11 +1258,11 @@ if __name__ == '__main__':
     result = list()
     for line in f.readlines():
         # logger.debug(len(line))
+        line = line.strip()
         if len(line) < 30 or line.startswith('//') or line.isspace():
             continue
             pass
         else:
-            line = line.strip()
             line = line.split()
             # logger.debug(line)
             # logger.debug('Channel:', line[1], 'Rate:', line[2], 'Chain:', line[3])

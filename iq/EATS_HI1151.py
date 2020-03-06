@@ -1623,13 +1623,13 @@ class DUT:
         self.tn.write(b'iwpriv vap%s al_tx 0\r\n' % vap.encode('ascii'))
         self.tn.read_until(b'root@OpenWrt:~# ', timeout=1)
         self.tn.write(b'iwpriv vap%s al_rx 0\r\n' % vap.encode('ascii'))
-        # self.tn.read_until(b'root@OpenWrt:~# ', timeout=1)
-        # self.tn.write(b'ifconfig vap%s down\r\n' % vap.encode('ascii'))
+        self.tn.read_until(b'root@OpenWrt:~# ', timeout=1)
+        self.tn.write(b'ifconfig vap%s down\r\n' % vap.encode('ascii'))
         self.tn.read_until(b'root@OpenWrt:~# ', timeout=1)
         self.tn.write(b'ifconfig vap%s hw ether 00:e0:52:22:22:14\r\n' % vap.encode('ascii'))
-        # self.tn.read_until(b'root@OpenWrt:~# ', timeout=1)
-        # self.tn.write(b'ifconfig vap%s up\r\n' % vap.encode('ascii'))
-        # time.sleep(2)
+        self.tn.read_until(b'root@OpenWrt:~# ', timeout=1)
+        self.tn.write(b'ifconfig vap%s up\r\n' % vap.encode('ascii'))
+        time.sleep(1)
         self.tn.read_until(b'root@OpenWrt:~# ', timeout=1)
         self.tn.write(b'iwpriv vap%s al_rx 1\r\n' % vap.encode('ascii'))
         # self.tn.read_until(b'#', timeout=1)
@@ -2033,11 +2033,11 @@ if __name__ == '__main__':
     result = list()
     for line in f.readlines():
         # logger.debug(len(line))
-        if len(line) < 30 or line.startswith('//'):
+        line = line.strip()
+        if len(line) < 30 or line.startswith('//') or line.isspace():
             continue
             pass
         else:
-            line = line.strip()
             line = line.split()
             # logger.debug(line)
             # logger.debug('Channel:', line[1], 'Rate:', line[2], 'Chain:', line[3])

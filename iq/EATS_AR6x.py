@@ -428,9 +428,9 @@ class IQxel():
                 else:
                     logger.info('Ramp Off Time:       ' + Fore.BLUE + ramp_off_time + Style.RESET_ALL + 'us')
                     result_ramp_off_time = 'Pass'
-            flasness = 'NA'
-            spec_flasness = 'NA'
-            result_flasness = 'NA'
+            flatness = 'NA'
+            spec_flatness = 'NA'
+            result_flatness = 'NA'
 
         else:
             logger.debug('OFDM')
@@ -541,32 +541,32 @@ class IQxel():
                 else:
                     logger.info('OBW:                 ' + Fore.BLUE + str(obw) + Style.RESET_ALL + 'MHz')
                     result_obw = 'Pass'
-            # flasness
+            # flatness
             # datas = self.instance.query('FETC:SEGM1:OFDM:SFL:SIGN1:AVER?')
             # time.sleep(0.2)
             # time.sleep(10)
-            # logger.info('flasness', datas)
-            data_flasness = self.instance.query('WIFI;FETC:SEGM:OFDM:SFL:AVER:CHEC?')
-            # data_flasness = self.query('WIFI;FETC:SEGM:OFDM:SFL:AVER?')
+            # logger.info('flatness', datas)
+            data_flatness = self.instance.query('WIFI;FETC:SEGM:OFDM:SFL:AVER:CHEC?')
+            # data_flatness = self.query('WIFI;FETC:SEGM:OFDM:SFL:AVER?')
             time.sleep(0.2)
-            logger.debug(data_flasness)
-            data_flasness = data_flasness.split(',')
-            spec_flasness = 0
-            data_flasness_len = len(data_flasness)
-            logger.debug(data_flasness_len)
-            if data_flasness_len < 2:
-                logger.error('Error: ' + str(data_flasness))
-                flasness = 'NA'
-                result_flasness = 'NA'
+            logger.debug(data_flatness)
+            data_flatness = data_flatness.split(',')
+            spec_flatness = 0
+            data_flatness_len = len(data_flatness)
+            logger.debug(data_flatness_len)
+            if data_flatness_len < 2:
+                logger.error('Error: ' + str(data_flatness))
+                flatness = 'NA'
+                result_flatness = 'NA'
             else:
-                # logger.debug(data_flasness)
-                flasness = data_flasness[0]
-                if int(flasness) == spec_flasness:
-                    logger.info('Flasness:            ' + Fore.BLUE + flasness + Style.RESET_ALL)
-                    result_flasness = 'Pass'
+                # logger.debug(data_flatness)
+                flatness = data_flatness[0]
+                if int(flatness) == spec_flatness:
+                    logger.info('flatness:            ' + Fore.BLUE + flatness + Style.RESET_ALL)
+                    result_flatness = 'Pass'
                 else:
-                    logger.info('Flasness:            ' + Fore.RED + flasness + Style.RESET_ALL)
-                    result_flasness = 'Fail'
+                    logger.info('flatness:            ' + Fore.RED + flatness + Style.RESET_ALL)
+                    result_flatness = 'Fail'
             ramp_on_time = 'NA'
             spec_ramp_on_time = 'NA'
             result_ramp_on_time = 'NA'
@@ -584,8 +584,8 @@ class IQxel():
                         [channel, rate, chain, target_power, avg_power, pwra_paras, spec_pwr, result_pwr,
                          avg_evm, spec_evm, result_evm, symbol_clock_error, spec_symbol_clock_error,
                          result_symbol_clock_error, lo_leakage, spec_lo_leakage, result_lo_leakage, obw,
-                         spec_obw, result_obw, mask, spec_mask, result_mask, flasness, spec_flasness,
-                         result_flasness, ramp_on_time, spec_ramp_on_time, result_ramp_on_time,
+                         spec_obw, result_obw, mask, spec_mask, result_mask, flatness, spec_flatness,
+                         result_flatness, ramp_on_time, spec_ramp_on_time, result_ramp_on_time,
                          ramp_off_time, spec_ramp_off_time, result_ramp_off_time])
         else:
             with open('./Result/' + tx_result_name, 'a+', newline='') as write_result:
@@ -593,8 +593,8 @@ class IQxel():
                 writer_file.writerow([channel, rate, chain, target_power, avg_power, pwra_paras, spec_pwr, result_pwr,
                                       avg_evm, spec_evm, result_evm, symbol_clock_error, spec_symbol_clock_error,
                                       result_symbol_clock_error, lo_leakage, spec_lo_leakage, result_lo_leakage, obw,
-                                      spec_obw, result_obw, mask, spec_mask, result_mask, flasness, spec_flasness,
-                                      result_flasness, ramp_on_time, spec_ramp_on_time, result_ramp_on_time,
+                                      spec_obw, result_obw, mask, spec_mask, result_mask, flatness, spec_flatness,
+                                      result_flatness, ramp_on_time, spec_ramp_on_time, result_ramp_on_time,
                                       ramp_off_time, spec_ramp_off_time, result_ramp_off_time])
 
         return avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask
@@ -1684,11 +1684,11 @@ if __name__ == '__main__':
     result = list()
     for line in f.readlines():
         # logger.debug(len(line))
-        if len(line) < 30 or line.startswith('//'):
+        line = line.strip()
+        if len(line) < 30 or line.startswith('//') or line.isspace():
             continue
             pass
         else:
-            line = line.strip()
             line = line.split()
             # logger.debug(line)
             # logger.debug('Channel:', line[1], 'Rate:', line[2], 'Chain:', line[3])
@@ -1958,11 +1958,11 @@ if __name__ == '__main__':
                         writer.writerow(['FREQ', 'DATA_RATE', 'CHAIN', 'TX_POWER', 'POWER', 'GAIN', 'LIMIT',
                                          'RESULT', 'EVM', 'LIMIT', 'RESULT', 'FREQ_ERROR', 'LIMIT', 'RESULT',
                                          'LOLEAKAGE', 'LIMIT', 'RESULT', 'OBW', 'LIMIT', 'RESULT',
-                                         'MASK', 'LIMIT', 'RESULT', 'FLAsnESS', 'LIMIT', 'RESULT',
+                                         'MASK', 'LIMIT', 'RESULT', 'flatness', 'LIMIT', 'RESULT',
                                          'RAMPONTIME', 'LIMIT', 'RESULT', 'RAMPOFFTIME', 'LIMIT', 'RESULT'])
                     gen_tx_report += 1
                 adjust_result = result_evm = result_symbol_clock_error = result_lo_leakage = result_mask = \
-                    result_flasness = 'Pass'
+                    result_flatness = 'Pass'
                 # dt.set_default()
                 dt.tx()
                 # RESULT
