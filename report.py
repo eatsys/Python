@@ -465,23 +465,9 @@ def write_range_att(posA, posB, posC, posX):
         att_list_forrange = str(att_list_forrange)
         tprx_list_forrange = str(tprx_list_forrange)
         chart.add_series({
-            'name': 'US Throughput',
-            'categories': '=(' + att_list_forrange + ')',
-            'values': '=(' + tptx_list_forrange + ')',
-            'line': ({'color': '#33CC66'}),
-            'smooth': True,
-            'gradient': {'colors': ['#BBFFFF', '#AEEEEE', '#96CDCD']},
-            'marker': {
-                'type': 'circle',
-                'size': 3,
-                'border': {'color': 'red'},
-                'fill': {'color': 'yellow'},
-            },
-        })
-        chart.add_series({
             'name': 'DS Throughput',
             'categories': '=(' + att_list_forrange + ')',
-            'values': '=(' + tprx_list_forrange + ')',
+            'values': '=(' + tptx_list_forrange + ')',
             'line': ({'color': '#3399FF'}),
             'smooth': True,
             'gradient': {'colors': ['#BBFFFF', '#AEEEEE', '#96CDCD']},
@@ -492,13 +478,13 @@ def write_range_att(posA, posB, posC, posX):
                 'fill': {'color': 'yellow'},
             },
         })
-    else:
         chart.add_series({
             'name': 'US Throughput',
-            'categories': '=Data!$' + chr(posB) + '$2:$' + chr(posB) + '$' + cur_row_axis,
-            'values': '=Data!$' + chr(posA) + '$2:$' + chr(posA) + '$' + cur_row_axis,
-            'line': {'color': '#33CC66'},
+            'categories': '=(' + att_list_forrange + ')',
+            'values': '=(' + tprx_list_forrange + ')',
+            'line': ({'color': '#33CC66'}),
             'smooth': True,
+            'gradient': {'colors': ['#BBFFFF', '#AEEEEE', '#96CDCD']},
             'marker': {
                 'type': 'circle',
                 'size': 3,
@@ -506,10 +492,11 @@ def write_range_att(posA, posB, posC, posX):
                 'fill': {'color': 'yellow'},
             },
         })
+    else:
         chart.add_series({
             'name': 'DS Throughput',
             'categories': '=Data!$' + chr(posB) + '$2:$' + chr(posB) + '$' + cur_row_axis,
-            'values': '=Data!$' + chr(posC) + '$2:$' + chr(posC) + '$' + cur_row_axis,
+            'values': '=Data!$' + chr(posA) + '$2:$' + chr(posA) + '$' + cur_row_axis,
             'line': {'color': '#3399FF'},
             'smooth': True,
             'marker': {
@@ -519,7 +506,19 @@ def write_range_att(posA, posB, posC, posX):
                 'fill': {'color': 'yellow'},
             },
         })
-
+        chart.add_series({
+            'name': 'US Throughput',
+            'categories': '=Data!$' + chr(posB) + '$2:$' + chr(posB) + '$' + cur_row_axis,
+            'values': '=Data!$' + chr(posC) + '$2:$' + chr(posC) + '$' + cur_row_axis,
+            'line': {'color': '#33CC66'},
+            'smooth': True,
+            'marker': {
+                'type': 'circle',
+                'size': 3,
+                'border': {'color': 'red'},
+                'fill': {'color': 'yellow'},
+            },
+        })
     chart.set_plotarea({
         'border': {'none': True},
         'fill': {'none': False},
@@ -534,13 +533,13 @@ def write_range(mode, posA, posB, posX):
     if mode == 'DS':
         name = 'Downstream Graph'
         tp_name = 'DS Throughput'
-        chart = 'chart_rx'
+        chart = 'chart_tx'
         color_line = '#3399FF'
         marker_type = 'diamond'
     elif mode == 'US':
         name = 'Upstream Graph'
         tp_name = 'US Throughput'
-        chart = 'chart_tx'
+        chart = 'chart_rx'
         color_line = '#33CC66'
         marker_type = 'circle'
     chart_tx = workbook.add_chart({"type": "line"})
@@ -644,11 +643,13 @@ def write_radar(posA, posE, max_tp=None):
     posY = 2
     posD = 2
     if posE == 'B':
-        tp_type = 'US Throughput'
-        marker_type = 'circle'
-    elif posE == 'J':
         tp_type = 'DS Throughput'
+        marker_type = 'circle'
+        color_line = '#3399FF'
+    elif posE == 'J':
+        tp_type = 'US Throughput'
         marker_type = 'diamond'
+        color_line = '#33CC66'
     else:
         print('Check postion')
         pass
@@ -664,7 +665,7 @@ def write_radar(posA, posE, max_tp=None):
             "name": "Mbps",
             "min": 0,
             "max": max_tp,
-            "major_unit": max_tp//8,
+            "major_unit": max_tp // 8,
         })
         radar.set_x_axis(
             {
@@ -688,7 +689,7 @@ def write_radar(posA, posE, max_tp=None):
                               str(int(ANGLE_NUM) + posY - 1),
                 'values': '=Data!$' + chr(posA) + '$' + str(posY) + ':$' + chr(posA) + '$' +
                           str(int(ANGLE_NUM) + posY - 1),
-                'line': {'color': '#3399FF'},
+                'line': {'color': color_line},
                 'smooth': True,
                 'gradient': {'colors': ['#FFE9D7', '#FFD4B2', '#FFC18B']},
                 'marker': {
@@ -810,9 +811,9 @@ def Generate_Test_Report():
         except:
             logger.error('No Environment Photo')
 
-    worksheet_range.write('V2', '***Note:Upstream and Downstream are based on AP***', info_format)
+    worksheet_range.write('V2', '***Note:Upstream and Downstream are based on Client***', info_format)
     if ANGLE_NUM > 1:
-        worksheet_angle.write('S2', '***Note:Upstream and Downstream are based on AP***', info_format)
+        worksheet_angle.write('S2', '***Note:Upstream and Downstream are based on Client***', info_format)
 
     try:
         rep_to_excel = Reportdata_Get()
@@ -838,7 +839,7 @@ def Generate_Test_Report():
         try:
             tx_tp = rep_to_excel.Tx_tp_get()
             posX = write_Tx()
-            posX_txtp_avg = posX
+            posX_txtp_avg = posX + 1
         except:
             logger.error('No file')
             posX += 1
@@ -848,7 +849,7 @@ def Generate_Test_Report():
         try:
             rx_tp = rep_to_excel.Rx_tp_get()
             posX = write_Rx(posX)
-            posX_rxtp_avg = posX
+            posX_rxtp_avg = posX + 1
         except:
             logger.error('No file')
             posX += 1
@@ -858,7 +859,7 @@ def Generate_Test_Report():
         try:
             rep_to_excel.Sta_rssi_get()
             posX = write_STA_Rssi(posX)
-            posX_STARSSI_avg = posX
+            posX_STARSSI_avg = posX + 1
         except:
             logger.error('No file')
             posX += 1
@@ -868,7 +869,7 @@ def Generate_Test_Report():
         try:
             rep_to_excel.Ap_rssi_get()
             posX = write_AP_Rssi(posX)
-            posX_APRSSI_avg = posX
+            posX_APRSSI_avg = posX + 1
         except:
             logger.error('No file')
             posX += 1
@@ -968,8 +969,8 @@ def Generate_Test_Report():
             rx_tp = [float(rx.decode('ascii')) for rx in rx_tp]
             max_txtp = int(max(tx_tp)) + 100.0
             max_rxtp = int(max(rx_tp)) + 100.0
-            write_radar(posX_txtp_avg, 'B', max_txtp)
-            write_radar(posX_rxtp_avg, 'J', max_rxtp)
+            write_radar(posX_txtp_avg - 1, 'B', max_txtp)
+            write_radar(posX_rxtp_avg - 1, 'J', max_rxtp)
     set_properties()
     workbook.close()
 
