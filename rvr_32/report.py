@@ -421,7 +421,7 @@ def write_range_att(posA, posB, posC, posX):
     cur_row_axis = str(len(Att_rep) * int(ANGLE_NUM) + 1)
     chart.set_title(
         {
-            "name": ''
+            "name": 'RVR'
         }
     )
     chart.set_y_axis(
