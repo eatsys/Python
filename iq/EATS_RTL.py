@@ -2,12 +2,10 @@
 # encoding: utf-8
 # @time      : 2020/3/4 14:08
 
-__author__ = 'Ethan'
-
 from __future__ import division
 from openpyxl import load_workbook
 from colorama import init, Fore, Style
-from parameters import IQ_IP, IQ_IP_INTERFERE, PATHLOSS_WANGTED, PATHLOSS_INTERFERE, DUT_IP, DUT_USERNAME, DUT_PASSWORD, \
+from parameters import IQ_IP, IQ_IP_INTERFERE, PATHLOSS_WANTED, PATHLOSS_INTERFERE, DUT_IP, DUT_USERNAME, DUT_PASSWORD, \
     DUT_COM, DUT_BAUDRATE, EXT1, EXT2, EXT3, ID_2G, ID_5G_LOW, ID_5G_HIGH, LOG_ENABLE, CALI_2G, CALI_5G, \
     AUTO_ADJUST_POWER, accuracy_limit_left, accuracy_limit_right, RX_PACKETS, RX_DYNAMIC
 from iq import IQxel
@@ -138,13 +136,13 @@ class DUT:
         self.tn.read_until(b'#ONT/system/shell>', timeout=1)
         self.tn.write(b'iwpriv wlan%s mp_ant_tx %s' % (band.encode('ascii'), chains.encode('ascii')) + b'\n')
         if mode == '11b' or mode == '11g' or mode == '11a':
-            rates = int(rate) * 2
+            ratess = int(rates) * 2
         elif bw == '80':
-            rates = int(rate) + 144
+            ratess = int(rates) + 144
         else:
-            rates = int(rate) + 128
+            ratess = int(rates) + 128
         self.tn.read_until(b'#ONT/system/shell>', timeout=1)
-        self.tn.write(b'iwpriv wlan%s mp_rate %d' % (band.encode('ascii'), rates) + b'\n')
+        self.tn.write(b'iwpriv wlan%s mp_rate %d' % (band.encode('ascii'), ratess) + b'\n')
         self.tn.read_until(b'#ONT/system/shell>', timeout=1)
         self.tn.write(b'iwpriv wlan%s mp_bandwidth 40M=%d,shortGI=0' % (band.encode('ascii'), bws) + b'\n')
         self.tn.read_until(b'#ONT/system/shell>', timeout=1)
@@ -234,11 +232,11 @@ class DUT:
         self.tn.write(b'iwpriv wlan%s mp_ant_tx %s' % (band.encode('ascii'), chains.encode('ascii')) + b'\n')
         logger.debug(mode)
         if mode == '11b' or mode == '11g' or mode == '11a':
-            rates = int(rate) * 2
+            ratess = int(rates) * 2
         else:
-            rates = int(rate) + 128
+            ratess = int(rates) + 128
         self.tn.read_until(b'#ONT/system/shell>', timeout=1)
-        self.tn.write(b'iwpriv wlan%s mp_rate %d' % (band.encode('ascii'), rates) + b'\n')
+        self.tn.write(b'iwpriv wlan%s mp_rate %d' % (band.encode('ascii'), ratess) + b'\n')
         self.tn.read_until(b'#ONT/system/shell>', timeout=1)
         self.tn.write(b'iwpriv wlan%s mp_bandwidth 40M=%d,shortGI=0' % (band.encode('ascii'), bws) + b'\n')
         self.tn.read_until(b'#ONT/system/shell>', timeout=1)
@@ -496,7 +494,7 @@ if __name__ == '__main__':
         exit(1)
     else:
         mw_iq = iq_wanted.read_idn
-        iq_wanted.set_pathloss(PATHLOSS_WANGTED)
+        iq_wanted.set_pathloss(PATHLOSS_WANTED)
         logger.info('IQ connected!')
     try:
         iq_interfere = IQxel(IQ_IP_INTERFERE)
@@ -1227,6 +1225,7 @@ if __name__ == '__main__':
                 # dt.set_default()
                 rx_counts = []
                 # dt.get_statistics()# init counts
+                dt.rx()
                 counts = dt.get_statistics()
                 rx_counts.append(counts)
                 # dt.rx_on()
@@ -1235,7 +1234,7 @@ if __name__ == '__main__':
                 iq_wanted.vsg(mw_iq, mode, bw, rates, channel, start)
                 counts = dt.get_statistics()
                 rx_counts.append(counts)
-                per = 1.0 - (float(rx_counts[-1]) - float(rx_counts[-2])) / float(RX_PACKETS)
+                per = 1.0 - (float(rx_counts[-1])) / float(RX_PACKETS)
                 per = float(per)
                 per = '{:.3f}'.format(per)
                 logger.debug(per)
@@ -1258,7 +1257,7 @@ if __name__ == '__main__':
                         time.sleep(0.2)
                         counts = dt.get_statistics()
                         rx_counts.append(counts)
-                        per = 1.0 - (float(rx_counts[-1]) - float(rx_counts[-2])) / float(RX_PACKETS)
+                        per = 1.0 - (float(rx_counts[-1])) / float(RX_PACKETS)
                         per = float(per)
                         per = '{:.3f}'.format(per)
                         logger.debug(per)
@@ -1296,7 +1295,7 @@ if __name__ == '__main__':
                         time.sleep(0.2)
                         counts = dt.get_statistics()
                         rx_counts.append(counts)
-                        per = 1.0 - (float(rx_counts[-1]) - float(rx_counts[-2])) / float(RX_PACKETS)
+                        per = 1.0 - (float(rx_counts[-1])) / float(RX_PACKETS)
                         per = float(per)
                         per = '{:.3f}'.format(per)
                         logger.debug(per)

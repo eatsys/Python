@@ -9,7 +9,7 @@
 from __future__ import division
 from openpyxl import load_workbook
 from colorama import init, Fore, Style
-from parameters import IQ_IP, IQ_IP_INTERFERE, PATHLOSS_WANGTED, PATHLOSS_INTERFERE, DUT_IP, DUT_USERNAME, DUT_PASSWORD, \
+from parameters import IQ_IP, IQ_IP_INTERFERE, PATHLOSS_WANTED, PATHLOSS_INTERFERE, DUT_IP, DUT_USERNAME, DUT_PASSWORD, \
     DUT_COM, DUT_BAUDRATE, EXT1, EXT2, EXT3, ID_2G, ID_5G_LOW, ID_5G_HIGH, LOG_ENABLE, CALI_2G, CALI_5G, \
     AUTO_ADJUST_POWER, accuracy_limit_left, accuracy_limit_right, RX_PACKETS, RX_DYNAMIC
 from iq import IQxel

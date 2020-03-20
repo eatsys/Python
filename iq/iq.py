@@ -318,7 +318,10 @@ class IQxel:
         else:
             data_txq = self.instance.query_ascii_values('WIFI;FETC:SEGM:TXQ:OFDM:AVER?')
         if data_txq[0] == 0.0:
-            symbol_clock_error = data_txq[4]
+            if mode == '11b':
+                symbol_clock_error = data_txq[6]
+            else:
+                symbol_clock_error = data_txq[4]
             symbol_clock_error = self.__formats__(symbol_clock_error)
             if abs(float(symbol_clock_error)) > abs(float(spec_symbol_clock_error)):
                 logger.info('Symbol Clock Error:  ' + Fore.RED + symbol_clock_error + Style.RESET_ALL + 'ppm')
@@ -363,7 +366,18 @@ class IQxel:
         :return:
         """
         data_mask = self.instance.query_ascii_values('WIFI;FETC:SEGM:SPEC:AVER:VIOL?')
+        logger.debug(data_mask)
         if data_mask[0] == 0.0:
+            mask = data_mask[1]
+            mask = self.__formats__(mask)
+            # spec_mask = 5.12
+            if abs(float(mask)) > float(spec_mask):
+                logger.info('Mask:                ' + Fore.RED + mask + Style.RESET_ALL + '%')
+                result_mask = 'Fail'
+            else:
+                logger.info('Mask:                ' + Fore.BLUE + mask + Style.RESET_ALL + '%')
+                result_mask = 'Pass'
+        elif data_mask[0] == 1.0:
             mask = data_mask[1]
             mask = self.__formats__(mask)
             # spec_mask = 5.12

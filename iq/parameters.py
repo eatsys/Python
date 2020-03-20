@@ -35,7 +35,7 @@ IQ_PORT_SLAVE3 = str(conf.slave3iq_port_get()).strip()
 IQ_ROUT_SLAVE3 = str(conf.slave3iq_rout_get()).strip()
 
 # PATHLOSS
-PATHLOSS_WANGTED = str(conf.pathloss_wanted_get()).strip()
+PATHLOSS_WANTED = str(conf.pathloss_wanted_get()).strip()
 PATHLOSS_INTERFERE = str(conf.pathloss_interfere_get())
 
 # DUT
@@ -66,3 +66,4 @@ accuracy_limit_left = str(conf.accuracylimit_left_get()).strip()
 accuracy_limit_right = str(conf.accuracylimit_right_get()).strip()
 RX_PACKETS = str(conf.RX_packets_get()).strip()
 RX_DYNAMIC = str(conf.rx_dynamic_get()).strip()
+SLEEP_TIME = str(conf.sleep_time_get()).strip()

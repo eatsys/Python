@@ -9,7 +9,7 @@ from openpyxl import load_workbook
 from parameters import IQ_IP, IQ_PORT, IQ_ROUT, RX_PACKETS, EVM_AG, EVM_N, EVM_AC, EVM_AX, RL, IQ_IP_INTERFERE,\
     IQ_PORT_INTERFERE, IQ_ROUT_INTERFERE, DUT_IP, DUT_COM, DUT_BAUDRATE, DUT_USERNAME, DUT_PASSWORD, ID_2G, \
     ID_5G_LOW, ID_5G_HIGH, VAP_2G, VAP_5G, LOG_ENABLE, CALI_2G, CALI_5G, AUTO_ADJUST_POWER, accuracy_limit_left, \
-    accuracy_limit_right, RX_DYNAMIC, PATHLOSS_WANGTED, PATHLOSS_INTERFERE
+    accuracy_limit_right, RX_DYNAMIC, PATHLOSS_WANTED, PATHLOSS_INTERFERE
 import os
 import sys
 import time

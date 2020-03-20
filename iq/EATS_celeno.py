@@ -6,10 +6,10 @@
 from __future__ import division
 from colorama import init, Fore, Style
 from openpyxl import load_workbook
-from parameters import IQ_IP, IQ_PORT, IQ_ROUT, RX_PACKETS, EVM_AG, EVM_N, EVM_AC, EVM_AX, RL, IQ_IP_INTERFERE,\
+from parameters import IQ_IP, IQ_PORT, IQ_ROUT, RX_PACKETS, EVM_AG, EVM_N, EVM_AC, EVM_AX, RL, IQ_IP_INTERFERE, \
     IQ_PORT_INTERFERE, IQ_ROUT_INTERFERE, DUT_IP, DUT_COM, DUT_BAUDRATE, DUT_USERNAME, DUT_PASSWORD, ID_2G, \
-    ID_5G_LOW, ID_5G_HIGH, VAP_2G, VAP_5G, EXT1, EXT2, EXT3, LOG_ENABLE, CALI_2G, CALI_5G, AUTO_ADJUST_POWER,\
-    accuracy_limit_left, accuracy_limit_right, RX_DYNAMIC, PATHLOSS_WANGTED, PATHLOSS_INTERFERE
+    ID_5G_LOW, ID_5G_HIGH, VAP_2G, VAP_5G, EXT1, EXT2, EXT3, LOG_ENABLE, CALI_2G, CALI_5G, AUTO_ADJUST_POWER, \
+    accuracy_limit_left, accuracy_limit_right, RX_DYNAMIC, PATHLOSS_WANTED, PATHLOSS_INTERFERE, SLEEP_TIME
 import os
 import sys
 import time
@@ -18,6 +18,7 @@ import telnetlib
 import csv
 import re
 import logging
+
 logger = logging.getLogger()
 
 
@@ -103,10 +104,10 @@ class IQxel():
                 self.instance.write('MEM:TABLE "' + str(path) + '"; MEM:TABLE:DEFINE "FREQ,LOSS"')
                 for path_loss in pathloss_list:
                     channel = path_loss[0]
-                    pathloss = path_loss[path+1]
+                    pathloss = path_loss[path + 1]
                     logger.debug(pathloss)
                     self.instance.write('MEM:TABLE "' + str(path) + '";MEMory:TABLe:INSert:POINt %s MHz,%s' %
-                                            (channel, pathloss))
+                                        (channel, pathloss))
                 self.instance.write('MEMory:TABLe "' + str(path) + '";MEMory:TABLe:STORe')
 
     def use_pathloss(self, mw):
@@ -127,7 +128,7 @@ class IQxel():
         if RL == '1':
             self.instance.write('%sVSA%s;RLEVel:AUTO' % (mw, IQ_ROUT))
         else:
-            rlevel = targetpower + 12
+            rlevel = target_power + 12
             logger.debug(str(rlevel))
             self.instance.write('%sVSA%s;RLEV %d;*wai;*opc?' % (mw, IQ_ROUT, rlevel))
         if int(bw) > 80:
@@ -156,7 +157,7 @@ class IQxel():
             standard = 'OFDM'
             mask_limit = '11AX'
         else:
-            capture_time = 10
+            capture_time = 0.01
             standard = 'OFDM'
             mask_limit = 'AUTO'
         if mode == '11a' and EVM_AG == '1':
@@ -186,9 +187,9 @@ class IQxel():
         self.instance.write('VSA%s ;init' % IQ_ROUT)
         self.instance.write('WIFI')
         self.instance.write('calc:pow 0, 2')
-        time.sleep(1)
+        time.sleep(2)
         self.instance.write('calc:txq 0, 2')
-        time.sleep(1)
+        time.sleep(3)
         self.instance.write('calc:ccdf 0, 2')
         self.instance.write('calc:ramp 0, 2')
         self.instance.write('calc:spec 0, 2')
@@ -199,7 +200,7 @@ class IQxel():
         get the data and check
         :return:
         """
-        time.sleep(1)
+        time.sleep(2)
         data_pwr = self.instance.query_ascii_values('WIFI;FETC:SEGM:POW:AVER?')
         if mode == '11b':
             data_txq = self.instance.query_ascii_values('WIFI;FETC:SEGM:TXQ:DSSS:AVER?')
@@ -207,6 +208,7 @@ class IQxel():
         else:
             data_txq = self.instance.query_ascii_values('WIFI;FETC:SEGM:TXQ:OFDM:AVER?')
             txqlen = 8
+        time.sleep(2)
         pwr_len = len(data_pwr)
         txq_len = len(data_txq)
         logger.debug(data_pwr)
@@ -214,7 +216,7 @@ class IQxel():
         logger.debug(data_txq)
         logger.debug(txq_len)
         status = 0
-        while pwr_len != 2 or txq_len != txqlen:
+        while pwr_len != 2 or txq_len != txqlen or data_pwr[1] > 99:
             self.analysis()
             data_pwr = self.instance.query_ascii_values('WIFI;FETC:SEGM:POW:AVER?')
             if mode == '11b':
@@ -233,8 +235,9 @@ class IQxel():
         return pwr_len, txq_len, data_pwr, data_txq
 
     def get_data(self, pwr_len, txq_len, data_pwr, data_txq, mode, channel, rate, chain, tx_result_name,
-                 target_power, spec_pwr, gain, spec_evm, evm_margin, spec_symbol_clock_error, spec_lo_leakage, spec_mask,
-                 spec_obw_20M, spec_obw_40M, spec_obw_80M, spec_obw_160M, result_list = []):
+                 target_power, spec_pwr, gain, spec_evm, evm_margin, spec_symbol_clock_error, spec_lo_leakage,
+                 spec_mask,
+                 spec_obw_20M, spec_obw_40M, spec_obw_80M, spec_obw_160M, result_list=[]):
         """
         get the test data and write to report
         :param pwr_len:
@@ -327,7 +330,7 @@ class IQxel():
                     result_lo_leakage = 'Pass'
             # mask
             data_mask = self.instance.query_ascii_values('WIFI;FETC:SEGM:SPEC:AVER:VIOL?')
-            time.sleep(0.2)
+            time.sleep(int(SLEEP_TIME))
             logger.debug(data_mask)
             data_mask_len = len(data_mask)
             logger.debug(data_mask_len)
@@ -348,7 +351,7 @@ class IQxel():
                     result_mask = 'Pass'
             # OBW
             data_obw = self.instance.query_ascii_values('WIFI;FETC:SEGM:SPEC:AVER:OBW?')
-            time.sleep(0.2)
+            time.sleep(int(SLEEP_TIME))
             logger.debug(data_obw)
             spec_obw = spec_obw_20M
             data_obw_len = len(data_obw)
@@ -371,7 +374,7 @@ class IQxel():
             # RAMP
             # on time
             data_ontime = self.instance.query_ascii_values('WIFI;FETC:SEGM:RAMP:ON:TRIS?')
-            time.sleep(0.2)
+            time.sleep(int(SLEEP_TIME))
             logger.debug(data_ontime)
             spec_ramp_on_time = 2.0
             data_ontime_len = len(data_ontime)
@@ -393,7 +396,7 @@ class IQxel():
                     result_ramp_on_time = 'Pass'
             # off time
             data_offtime = self.instance.query_ascii_values('WIFI;FETC:SEGM:RAMP:OFF:TRIS?')
-            time.sleep(0.2)
+            time.sleep(int(SLEEP_TIME))
             logger.debug(data_offtime)
             spec_ramp_off_time = 2.0
             data_offtime_len = len(data_offtime)
@@ -413,9 +416,9 @@ class IQxel():
                 else:
                     logger.info('Ramp Off Time:       ' + Fore.BLUE + ramp_off_time + Style.RESET_ALL + 'us')
                     result_ramp_off_time = 'Pass'
-            flasness = 'NA'
-            spec_flasness = 'NA'
-            result_flasness = 'NA'
+            flatness = 'NA'
+            spec_flatness = 'NA'
+            result_flatness = 'NA'
 
         else:
             logger.debug('OFDM')
@@ -480,7 +483,7 @@ class IQxel():
                     result_lo_leakage = 'Pass'
             # mask
             data_mask = self.instance.query_ascii_values('WIFI;FETC:SEGM:SPEC:AVER:VIOL?')
-            time.sleep(0.2)
+            time.sleep(int(SLEEP_TIME))
             logger.debug(data_mask)
             data_mask_len = len(data_mask)
             logger.debug(data_mask_len)
@@ -501,7 +504,7 @@ class IQxel():
                     result_mask = 'Pass'
             # OBW
             data_obw = self.instance.query_ascii_values('WIFI;FETC:SEGM:SPEC:AVER:OBW?')
-            time.sleep(0.2)
+            time.sleep(int(SLEEP_TIME))
             logger.debug(data_obw)
             if bw == '80':
                 spec_obw = spec_obw_80M
@@ -528,32 +531,32 @@ class IQxel():
                 else:
                     logger.info('OBW:                 ' + Fore.BLUE + str(obw) + Style.RESET_ALL + 'MHz')
                     result_obw = 'Pass'
-            # flasness
+            # flatness
             # datas = self.instance.query('FETC:SEGM1:OFDM:SFL:SIGN1:AVER?')
-            # time.sleep(0.2)
+            # time.sleep(int(SLEEP_TIME))
             # time.sleep(10)
-            # logger.info('flasness', datas)
-            data_flasness = self.instance.query('WIFI;FETC:SEGM:OFDM:SFL:AVER:CHEC?')
-            # data_flasness = self.query('WIFI;FETC:SEGM:OFDM:SFL:AVER?')
-            time.sleep(0.2)
-            logger.debug(data_flasness)
-            data_flasness = data_flasness.split(',')
-            spec_flasness = 0
-            data_flasness_len = len(data_flasness)
-            logger.debug(data_flasness_len)
-            if data_flasness_len < 2:
-                logger.error('Error: ' + str(data_flasness))
-                flasness = 'NA'
-                result_flasness = 'NA'
+            # logger.info('flatness', datas)
+            data_flatness = self.instance.query('WIFI;FETC:SEGM:OFDM:SFL:AVER:CHEC?')
+            # data_flatness = self.query('WIFI;FETC:SEGM:OFDM:SFL:AVER?')
+            time.sleep(int(SLEEP_TIME))
+            logger.debug(data_flatness)
+            data_flatness = data_flatness.split(',')
+            spec_flatness = 0
+            data_flatness_len = len(data_flatness)
+            logger.debug(data_flatness_len)
+            if data_flatness_len < 2:
+                logger.error('Error: ' + str(data_flatness))
+                flatness = 'NA'
+                result_flatness = 'NA'
             else:
-                # logger.debug(data_flasness)
-                flasness = data_flasness[0]
-                if int(flasness) == spec_flasness:
-                    logger.info('Flasness:            ' + Fore.BLUE + flasness + Style.RESET_ALL)
-                    result_flasness = 'Pass'
+                # logger.debug(data_flatness)
+                flatness = data_flatness[0]
+                if int(flatness) == spec_flatness:
+                    logger.info('flatness:            ' + Fore.BLUE + flatness + Style.RESET_ALL)
+                    result_flatness = 'Pass'
                 else:
-                    logger.info('Flasness:            ' + Fore.RED + flasness + Style.RESET_ALL)
-                    result_flasness = 'Fail'
+                    logger.info('flatness:            ' + Fore.RED + flatness + Style.RESET_ALL)
+                    result_flatness = 'Fail'
             ramp_on_time = 'NA'
             spec_ramp_on_time = 'NA'
             result_ramp_on_time = 'NA'
@@ -567,15 +570,15 @@ class IQxel():
                 [channel, rate, chain, target_power, avg_power, gain, spec_pwr, result_pwr,
                  avg_evm, spec_evm, result_evm, symbol_clock_error, spec_symbol_clock_error,
                  result_symbol_clock_error, lo_leakage, spec_lo_leakage, result_lo_leakage, obw,
-                 spec_obw, result_obw, mask, spec_mask, result_mask, flasness, spec_flasness,
-                 result_flasness, ramp_on_time, spec_ramp_on_time, result_ramp_on_time,
-                         ramp_off_time, spec_ramp_off_time, result_ramp_off_time])
+                 spec_obw, result_obw, mask, spec_mask, result_mask, flatness, spec_flatness,
+                 result_flatness, ramp_on_time, spec_ramp_on_time, result_ramp_on_time,
+                 ramp_off_time, spec_ramp_off_time, result_ramp_off_time])
 
         result_list.append([channel, rate, chain, target_power, avg_power, gain, spec_pwr, result_pwr,
                             avg_evm, spec_evm, result_evm, symbol_clock_error, spec_symbol_clock_error,
                             result_symbol_clock_error, lo_leakage, spec_lo_leakage, result_lo_leakage, obw,
-                            spec_obw, result_obw, mask, spec_mask, result_mask, flasness, spec_flasness,
-                            result_flasness, ramp_on_time, spec_ramp_on_time, result_ramp_on_time,
+                            spec_obw, result_obw, mask, spec_mask, result_mask, flatness, spec_flatness,
+                            result_flatness, ramp_on_time, spec_ramp_on_time, result_ramp_on_time,
                             ramp_off_time, spec_ramp_off_time, result_ramp_off_time])
 
         return avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask, result_list
@@ -683,7 +686,8 @@ class IQxel():
         self.instance.write('WLIST:COUNT:DISABLE WSEG1')
 
     def vsg_aj(self, mw, rlevel):
-        self.instance.write('%sROUT%s;PORT:RES RF%s,VSG%s' % (mw, IQ_ROUT_INTERFERE, IQ_PORT_INTERFERE, IQ_ROUT_INTERFERE))
+        self.instance.write(
+            '%sROUT%s;PORT:RES RF%s,VSG%s' % (mw, IQ_ROUT_INTERFERE, IQ_PORT_INTERFERE, IQ_ROUT_INTERFERE))
         self.instance.write('CHAN1;WIFI')
         if int(bw) == 20 and 2400 < int(channel) < 2440:
             channel_aj = int(channel) + 25
@@ -751,7 +755,8 @@ class IQxel():
         self.instance.write('VSG1;MOD:STAT ON')
 
     def vsg_naj(self, mw, rlevel):
-        self.instance.write('%sROUT%s;PORT:RES RF%s,VSG%s' % (mw, IQ_ROUT_INTERFERE, IQ_PORT_INTERFERE, IQ_ROUT_INTERFERE))
+        self.instance.write(
+            '%sROUT%s;PORT:RES RF%s,VSG%s' % (mw, IQ_ROUT_INTERFERE, IQ_PORT_INTERFERE, IQ_ROUT_INTERFERE))
         self.instance.write('CHAN1;WIFI')
         if int(bw) == 20 and 2400 < int(channel) <= 2422:
             channel_naj = int(channel) + 50
@@ -885,9 +890,9 @@ class IQxel():
         self.instance.write('MVSAALL ;MVSGALL:INST:COUN 1;MVSAALL:INST:COUN 1;init')
         self.instance.write('WIFI')
         self.instance.write('calc:pow 0, 2')
-        time.sleep(1)
+        time.sleep(int(SLEEP_TIME))
         self.instance.write('calc:txq 0, 2')
-        time.sleep(1)
+        time.sleep(int(SLEEP_TIME))
         self.instance.write('calc:ccdf 0, 2')
         self.instance.write('calc:ramp 0, 2')
         self.instance.write('calc:spec 0, 2')
@@ -898,7 +903,7 @@ class IQxel():
         get the data and check
         :return:
         """
-        time.sleep(1)
+        time.sleep(int(SLEEP_TIME))
         data_pwr = self.instance.query_ascii_values('WIFI;FETC:SEGM:POW:SIGN%s:AVER?' % stream)
         data_txq = self.instance.query_ascii_values('WIFI;FETC:SEGM:TXQ:OFDM:AVER?')
         txqlen = 8
@@ -926,7 +931,7 @@ class IQxel():
 
     def get_data_mimo(self, pwr_len, txq_len, data_pwr, data_txq, stream, channel, rate, chain, tx_result_name,
                       target_power, spec_pwr, pwra_paras, spec_evm, evm_margin, spec_symbol_clock_error,
-                      spec_lo_leakage, spec_mask, spec_obw_20M, spec_obw_40M,spec_obw_80M, spec_obw_160M):
+                      spec_lo_leakage, spec_mask, spec_obw_20M, spec_obw_40M, spec_obw_80M, spec_obw_160M):
         """
         :param pwr_len:
         :param txq_len:
@@ -1013,7 +1018,7 @@ class IQxel():
                 result_lo_leakage = 'Pass'
         # mask
         data_mask = self.instance.query_ascii_values('WIFI;FETC:SEGM:SPEC:SIGN%s:AVER:VIOL?' % stream)
-        time.sleep(0.2)
+        time.sleep(int(SLEEP_TIME))
         logger.debug(data_mask)
         data_mask_len = len(data_mask)
         logger.debug(data_mask_len)
@@ -1034,7 +1039,7 @@ class IQxel():
                 result_mask = 'Pass'
         # OBW
         data_obw = self.instance.query_ascii_values('WIFI;FETC:SEGM:SPEC:SIGN%s:AVER:OBW?' % stream)
-        time.sleep(0.2)
+        time.sleep(int(SLEEP_TIME))
         logger.debug(data_obw)
         if bw == '80':
             spec_obw = spec_obw_80M
@@ -1061,28 +1066,28 @@ class IQxel():
             else:
                 logger.info('OBW:                 ' + Fore.BLUE + str(obw) + Style.RESET_ALL + 'MHz')
                 result_obw = 'Pass'
-        # flasness
-        data_flasness = self.instance.query('WIFI;FETC:SEGM:OFDM:SFL:SIGN%s:AVER:CHEC?' % stream)
-        # data_flasness = self.query('WIFI;FETC:SEGM:OFDM:SFL:AVER?')
-        time.sleep(0.2)
-        logger.debug(data_flasness)
-        data_flasness = data_flasness.split(',')
-        spec_flasness = 0
-        data_flasness_len = len(data_flasness)
-        logger.debug(data_flasness_len)
-        if data_flasness_len < 2:
-            logger.error('Error: ' + str(data_flasness))
-            flasness = 'NA'
-            result_flasness = 'NA'
+        # flatness
+        data_flatness = self.instance.query('WIFI;FETC:SEGM:OFDM:SFL:SIGN%s:AVER:CHEC?' % stream)
+        # data_flatness = self.query('WIFI;FETC:SEGM:OFDM:SFL:AVER?')
+        time.sleep(int(SLEEP_TIME))
+        logger.debug(data_flatness)
+        data_flatness = data_flatness.split(',')
+        spec_flatness = 0
+        data_flatness_len = len(data_flatness)
+        logger.debug(data_flatness_len)
+        if data_flatness_len < 2:
+            logger.error('Error: ' + str(data_flatness))
+            flatness = 'NA'
+            result_flatness = 'NA'
         else:
-            # logger.debug(data_flasness)
-            flasness = data_flasness[0]
-            if int(flasness) == spec_flasness:
-                logger.info('Flasness:            ' + Fore.BLUE + flasness + Style.RESET_ALL)
-                result_flasness = 'Pass'
+            # logger.debug(data_flatness)
+            flatness = data_flatness[0]
+            if int(flatness) == spec_flatness:
+                logger.info('flatness:            ' + Fore.BLUE + flatness + Style.RESET_ALL)
+                result_flatness = 'Pass'
             else:
-                logger.info('Flasness:            ' + Fore.RED + flasness + Style.RESET_ALL)
-                result_flasness = 'Fail'
+                logger.info('flatness:            ' + Fore.RED + flatness + Style.RESET_ALL)
+                result_flatness = 'Fail'
 
         if AUTO_ADJUST_POWER == '1' and avg_power != 'NA':
             if float(avg_power) < float(power_accuracy_left) or float(avg_power) > float(power_accuracy_right):
@@ -1094,16 +1099,16 @@ class IQxel():
                         [channel, rate, chain, target_power, avg_power, pwra_paras, spec_pwr, result_pwr,
                          avg_evm, spec_evm, result_evm, symbol_clock_error, spec_symbol_clock_error,
                          result_symbol_clock_error, lo_leakage, spec_lo_leakage, result_lo_leakage, obw,
-                         spec_obw, result_obw, mask, spec_mask, result_mask, flasness, spec_flasness,
-                         result_flasness])
+                         spec_obw, result_obw, mask, spec_mask, result_mask, flatness, spec_flatness,
+                         result_flatness])
         else:
             with open('./Result/' + tx_result_name, 'a+', newline='') as write_result:
                 writer_file = csv.writer(write_result)
                 writer_file.writerow([channel, rate, chain, target_power, avg_power, pwra_paras, spec_pwr, result_pwr,
                                       avg_evm, spec_evm, result_evm, symbol_clock_error, spec_symbol_clock_error,
                                       result_symbol_clock_error, lo_leakage, spec_lo_leakage, result_lo_leakage, obw,
-                                      spec_obw, result_obw, mask, spec_mask, result_mask, flasness, spec_flasness,
-                                      result_flasness])
+                                      spec_obw, result_obw, mask, spec_mask, result_mask, flatness, spec_flatness,
+                                      result_flatness])
 
         return avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask
 
@@ -1120,12 +1125,12 @@ class DUT:
 
     def login(self, host, username, password):
         self.tn.open(host, port=23)
-        self.tn.read_until(b'Login: ', timeout=1)
+        self.tn.read_until(b'Login: ', timeout=2)
         self.tn.write(username.encode('ascii') + b'\r\n')
-        self.tn.read_until(b'Password:', timeout=1)
+        self.tn.read_until(b'Password:', timeout=2)
         self.tn.write(password.encode('ascii') + b'\r\n')
 
-        time.sleep(1)
+        time.sleep(2)
         command_result = self.tn.read_very_eager().decode('ascii')
         print(command_result)
         if 'wrong' not in command_result:
@@ -1136,43 +1141,24 @@ class DUT:
             return False
 
     def init(self, str1, str2, str3):
-        self.tn.read_until(b'WAP>', timeout=1)
+        self.tn.read_until(b'WAP>', timeout=2)
         self.tn.write(str1.encode('ascii') + b'\n')
 
-        self.tn.read_until(b'SU_WAP>', timeout=1)
+        self.tn.read_until(b'SU_WAP>', timeout=2)
         self.tn.write(str2.encode('ascii') + b'\n')
 
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=2)
         self.tn.write(str3.encode('ascii') + b'\n')
 
         # command_result = self.tn.read_very_eager().decode('ascii')
         # logging.info('\n%s' % command_result)
 
     def ex_command(self, command):
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(command.encode('ascii') + b'\n')
         time.sleep(2)
         command_result = self.tn.read_very_eager().decode('ascii')
         logging.info('\n%s' % command_result)
-
-    def reset_cali(self):
-        if CALI_2G == '1':
-            self.tn.write(b'wifi calibrate test parameter write wifichip 1 type power len 77 value default\r\n')
-        elif CALI_5G == '1':
-            self.tn.write(b'wifi calibrate test parameter write wifichip 2 type power len 155 value default\r\n')
-
-    def reset_upc(self):
-        if CALI_2G == '1':
-            self.tn.write(b'wifi calibrate test parameter write wifichip 1 type upc len 12 value default\r\n')
-        elif CALI_5G == '1':
-            self.tn.write(b'wifi calibrate test parameter write wifichip 2 type upc len 28 value default\r\n')
-
-    def init_cali(self):
-        if CALI_2G == '1':
-            self.tn.write(b'wifi_equipment.sh init chip 1\r\n')
-            # self.tn.write(b'killall hostapd\r\n')
-        elif CALI_5G == '1':
-            self.tn.write(b'wifi_equipment.sh init chip 2\r\n')
 
     def init_ppm(self):
         """
@@ -1181,48 +1167,48 @@ class DUT:
         """
         if int(channel) < 5000:
             band = ID_2G
-            bands = 'offset_24g'
-        elif int(channel) < 5500:
-            band = ID_5G_LOW
-            bands = 'offset'
         else:
+            ID_5G_HIGH = ID_5G_LOW
             band = ID_5G_HIGH
-            bands = 'offset'
         # for 2.4g
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'\r\n')
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE stop\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE stop\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE start\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE bw 0\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE gi 0\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 ATE mcs 0\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 ATE mode 1\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE mcs 7\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE mode 2\r\n' % band.encode('ascii'))
         if int(channel) < 5000:
             channels = '{:.0f}'.format((int(channel) - 2407) / 5)  # 2407+5*1=2412
         else:
             channels = '{:.0f}'.format((int(channel) - 5000) / 5)  # 5000+5*36=5180
         channels = str(channels)
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE txlen 1024\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE txcnt 10000000\r\n' % band.encode('ascii'))
         # logger(channel)
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE channel %s\r\n' % (band.encode('ascii'), channels.encode('ascii')))
-        time.sleep(1)
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 ATE ant %s\r\n' % (band.encode('ascii'), chain.encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 e2p get freq_%s\r\n' % (band.encode('ascii'), bands.encode('ascii')))
-        time.sleep(0.5)
+        time.sleep(int(SLEEP_TIME))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE ant 0\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE pow 30 30 30 30\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE txframe\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 e2p get freq_offset\r\n' % band.encode('ascii'))
+        time.sleep(2)
         command_result = self.tn.read_very_eager()
         logger.debug(command_result)
         offset = command_result.decode('utf-8').split()[-1]
@@ -1231,16 +1217,8 @@ class DUT:
             logger.debug(result.decode('utf-8'))
             result_list.append(result.decode('utf-8'))
         offset = result_list[-4]
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 ATE TXFREQOFFSET %s\r\n' % (band.encode('ascii'), str(offset).encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 ATE txframe\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 cecli temp_loop 1\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 cecli temperature\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 cecli temperature2 2\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE TXFREQOFFSET %s\r\n' % (band.encode('ascii'), offset.encode('ascii')))
         return offset
 
     def adjust_ppm(self, ppm):
@@ -1251,11 +1229,10 @@ class DUT:
         """
         if int(channel) < 5000:
             band = ID_2G
-        elif int(channel) < 5500:
-            band = ID_5G_LOW
         else:
+            ID_5G_HIGH = ID_5G_LOW
             band = ID_5G_HIGH
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE TXFREQOFFSET %s\r\n' % (band.encode('ascii'), str(ppm).encode('ascii')))
 
     def write_ppm(self, ppm):
@@ -1264,14 +1241,40 @@ class DUT:
         :param ppm:
         :return:
         """
-        self.tn.write(b'wifi calibrate test parameter write wifichip %s type freqoffset len 4 value %s\r\n'
-                      % (band.encode('ascii'), ppm.encode('ascii')))
+        if int(channel) < 5000:
+            band = ID_2G
+        else:
+            ID_5G_HIGH = ID_5G_LOW
+            band = ID_5G_HIGH
+        self.tn.write(b'iw wlan%s_0 e2p set freq_offset %s\r\n' % (band.encode('ascii'), str(ppm).encode('ascii')))
 
-    def get_pwr_para(self):
-        self.tn.write(b'wifi_equipment.sh get_txpower chip %s para 3\r\n' % band.encode('ascii'))
-        command_result = self.tn.read_until('ss')
-        para_list = command_result
-        return para_list
+    def init_cali_pwr(self):
+        if CALI_2G == '1':
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+            self.tn.write(b'\r\n')
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+            self.tn.write(b'iw wlan%s_0 celi temp_loop 0\r\n' % str(ID_2G).encode('ascii'))
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+            self.tn.write(b'iw wlan%s_0 ATE vector reset\r\n' % str(ID_2G).encode('ascii'))
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+            self.tn.write(b'iw wlan%s_0 ATE vector 1 7 11\r\n' % str(ID_2G).encode('ascii'))
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+            self.tn.write(b'iw wlan%s_0 ATE stop\r\n' % str(ID_2G).encode('ascii'))
+        elif CALI_5G == '1':
+            if ID_5G_LOW == ID_5G_HIGH:
+                ID_5G = ID_5G_LOW
+            else:
+                ID_5G = ID_5G_LOW
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+            self.tn.write(b'\r\n')
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+            self.tn.write(b'iw wlan%s_0 celi temp_loop 0\r\n' % str(ID_5G).encode('ascii'))
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+            self.tn.write(b'iw wlan%s_0 ATE vector reset\r\n' % str(ID_5G).encode('ascii'))
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+            self.tn.write(b'iw wlan%s_0 ATE vector 36 64 100 120 140 149 161\r\n' % str(ID_5G).encode('ascii'))
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+            self.tn.write(b'iw wlan%s_0 ATE stop\r\n' % str(ID_5G).encode('ascii'))
 
     def cali_pwr(self, cali_channel, chain):
         """
@@ -1280,23 +1283,73 @@ class DUT:
         :param chain:
         :return:
         """
-        if int(cali_channel) < 5000:
-            vap = VAP_2G
-            cali_mode = '11g'
+        if int(channel) < 5000:
+            band = ID_2G
         else:
-            vap = VAP_5G
-            cali_mode = '11a'
-        if chain == '0':
-            chains = '01'
-        else:
-            chains = '10'
-        self.tn.write(b'iwpriv vap%s txpower 300\r\n' % vap.encode('ascii'))
-        self.tn.write(b'iwpriv vap%s mode %s\r\n' % cali_mode.encode('ascii'))
-        self.tn.write(b'iwpriv vap%s bw 20\r\n')
-        self.tn.write(b'iwpriv vap%s freq %s\r\n' % cali_channel.encode('ascii'))
-        self.tn.write(b'iwpriv vap%s rate 6\r\n')
-        self.tn.write(b'iwpriv vap%s txch 00%s\r\n' % chains.encode('ascii'))
-        logger.debug(f'vap{vap} mode{cali_mode} 20 {cali_channel} 6 00{chains}')
+            ID_5G_HIGH = ID_5G_LOW
+            band = ID_5G_HIGH
+        # for 2.4g
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'\r\n')
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE stop\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE stop\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE start\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE bw 0\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE gi 0\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE mcs 7\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE mode 2\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE txlen 1024\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE txcnt 10000000\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE channel %s\r\n' % (band.encode('ascii'), str(cali_channel).encode('ascii')))
+        time.sleep(int(SLEEP_TIME))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE ant %s\r\n' % (band.encode('ascii'), chain.encode('ascii')))
+        # self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        # self.tn.write(b'iw wlan%s_0 e2p get calib %s %s\r\n' % (
+        #     band.encode('ascii'), chain.encode('ascii'), str(cali_channel).encode('ascii')))
+        # time.sleep(int(SLEEP_TIME))
+        # command_result = self.tn.read_very_eager()
+        # logger.debug(command_result)
+        # pwr_para = command_result.decode('utf-8').split()[-1]
+        # result_list = []
+        # for result in command_result.split():
+        #     logger.debug(result.decode('utf-8'))
+        #     result_list.append(result.decode('utf-8'))
+        # pwr_para = result_list[-4]
+        # self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        # self.tn.write(b'iw wlan%s_0 ATE pow %s %s %s %s\r\n' % (
+        #     band.encode('ascii'), pwr_para.encode('ascii'), pwr_para.encode('ascii'),
+        #     pwr_para.encode('ascii'), pwr_para.encode('ascii')))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE pow 30 30 30 30\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE txframe\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 e2p get freq_offset\r\n' % band.encode('ascii'))
+        # time.sleep(int(SLEEP_TIME))
+        # command_result = self.tn.read_very_eager()
+        # logger.debug(command_result)
+        # offset = command_result.decode('utf-8').split()[-1]
+        # logger.debug(offset)
+        # result_list = []
+        # for result in command_result.split():
+        #     logger.debug(result.decode('utf-8'))
+        #     result_list.append(result.decode('utf-8'))
+        # offset = result_list[-4]
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE TXFREQOFFSET %s\r\n' % (band.encode('ascii'), str(ppm).encode('ascii')))
+        logger.info(f'Cali Chain: {chain} Channel: {cali_channel}')
+        # return pwr_para
 
     def adjust_pwr(self, adjust_power):
         """
@@ -1305,111 +1358,64 @@ class DUT:
         :return:
         """
         if int(channel) < 5000:
-            vap = VAP_2G
+            band = ID_2G
         else:
-            vap = VAP_5G
-        self.tn.write(b'iwpriv vap%s txpower %s\r\n' % (vap.encode('ascii'), str(adjust_power).encode('ascii')))
-        logger.debug(f'iwpriv vap{vap} txpower {adjust_power}')
+            ID_5G_HIGH = ID_5G_LOW
+            band = ID_5G_HIGH
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE pow %s %s %s %s\r\n' % (
+            band.encode('ascii'), str(adjust_power).encode('ascii'), str(adjust_power).encode('ascii'),
+            str(adjust_power).encode('ascii'), str(adjust_power).encode('ascii')))
+        logger.info(f'Gain: {adjust_power}')
 
-    def cali_pwr_write(self, adjust_power_list):
+    def cali_pwr_write(self, adjust_power):
         """
         write the test power to cali power
         :param adjust_power_list:
         :return:
         """
-        if band == '1':
-            hi_id = '0'
+        if int(channel) < 5000:
+            band = ID_2G
         else:
-            hi_id = '1'
-        if cali_channel < 5:
-            subband = '0'
-        elif cali_channel == 8 or cali_channel == 40:
-            subband = '1'
-        elif cali_channel == 12 or cali_channel == 56:
-            subband = '2'
-        elif cali_channel == 104:
-            subband = '3'
-        elif cali_channel == 120:
-            subband = '4'
-        elif cali_channel == 136:
-            subband = '5'
-        elif cali_channel == 157:
-            subband = '6'
-        else:
-            subband = '0'
-        self.tn.write(b'iwpriv Hisilicon%s cali_power "%s %s %s %s %s"\r\n' %
-                      (hi_id.encode('ascii'), str(cali_chain).encode('ascii'), subband.encode('ascii'),
-                       str(adjust_power_list[0]).encode('ascii'), str(adjust_power_list[1]).encode('ascii'),
-                       str(adjust_power_list[2]).encode('ascii')) + b'\r\n')
-        logger.debug(f'shell iwpriv Hisilicon{hi_id} cali_power "{cali_chain} {subband} {adjust_power_list[0]} '
-                     f'{adjust_power_list[1]} {adjust_power_list[2]}"')
+            ID_5G_HIGH = ID_5G_LOW
+            band = ID_5G_HIGH
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 e2p set calib %s %s %s 18\r\n' % (
+            band.encode('ascii'), str(chain).encode('ascii'), str(cali_channel).encode('ascii'),
+            str(adjust_power).encode('ascii')))
+        logger.info(f'Chain:{chain} Channel:{cali_channel} Gain:{adjust_power} ')
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 cecli temperature\r\n' % band.encode('ascii'))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 cecli temperature2 2\r\n' % band.encode('ascii'))
 
-    def cali_para_write(self):
+    def cali_flash_write(self):
         """
         get the cali param and write to flash
         :return:
         """
-        if int(channel) < 5000:
-            vap = VAP_2G
-        else:
-            vap = VAP_5G
-        self.tn.write(b'\r\n')
-        self.tn.write(b'iwpriv vap%s get_power_param\r\n' % vap.encode('ascii') + b'\r\n')
-        logger.debug(f'iwpriv vap{vap} get_power_param')
-        self.tn.write(b'ls\r\n')
-        command_result = self.tn.read_until(b'Enabled')
-        logger.debug(command_result)
-        pwrcali_para = re.findall(b'get_power_param:\r+\n+(.+)\r+', command_result)[0].decode('utf-8')
-        logger.debug(command_result)
-        self.tn.write(b'wifi calibrate test parameter write wifichip %s type power len %s value %s\r\n' %
-                      (band.encode('ascii'), radio_adress.encode('ascii'), pwrcali_para.encode('ascii')) + b'\r\n')
-        logger.debug(
-            f'wifi calibrate test parameter write wifichip {band} type power len {radio_adress} value {pwrcali_para}')
-        command_result = self.tn.read_all()
-        for result in command_result:
-            logger.debug(result.strip().decode('utf-8'))
-        self.tn.write(b'wifi calibrate test parameter read wifichip %s type power len %s\r\n' %
-                      (band.encode('ascii'), radio_adress.encode('ascii')) + b'\r\n')
-        logger.debug((f'wifi calibrate test parameter read wifichip %s type power len {radio_adress}'))
-        pwrcali_result = self.tn.read_until(b'success!')
-        logger.debug(pwrcali_result)
+        if CALI_2G == '1':
+            ssid_value = '1'
+        elif CALI_5G == '1':
+            ssid_value = '5'
+        logger.info('Write flash...')
+        self.tn.write(b'chipdebug wifi debug writetomtd ssid %s\r\n' % ssid_value.encode('ascii'))
 
-    def upc_write(self):
+    def write_check(self):
         if int(channel) < 5000:
-            vap = VAP_2G
+            band = ID_2G
         else:
-            vap = VAP_5G
-        self.tn.write(b'\r\n')
-        self.tn.write(b'iwpriv vap%s get_upc_param\r\n' % vap.encode('ascii') + b'\r\n')
-        logger.debug(f'iwpriv vap{vap} get_power_param')
-        self.tn.write(b'ls\r\n')
-        command_result = self.tn.read_until(b'Enabled')
-        logger.debug(command_result)
-        pwrcali_para = re.findall(b'get_upc_param:\r+\n+(.+)\r+', command_result)[0].decode('utf-8')
-        logger.debug(command_result)
-        self.tn.write(b'wifi calibrate test parameter write wifichip %s type upc len %s value %s\r\n' %
-                      (band.encode('ascii'), upc_lenth.encode('ascii'), pwrcali_para.encode('ascii')) + b'\r\n')
-        logger.debug(
-            f'wifi calibrate test parameter write wifichip {band} type power len {upc_lenth} value {pwrcali_para}')
-        command_result = self.tn.read_all()
-        for result in command_result:
-            logger.debug(result.strip().decode('utf-8'))
-
-    def crc(self):
-        """
-        crc cali
-        :return:
-        """
-        self.tn.write(b'wifi calibrate parameter crc calc\r\n')
-        self.tn.write(b'wifi calibrate parameter crc check\r\n')
-        command_result = self.tn.readlines()
-        for result in command_result:
-            logger.debug(result.strip().decode('utf-8'))
+            ID_5G_HIGH = ID_5G_LOW
+            band = ID_5G_HIGH
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 e2p get table\r\n' % band.encode('ascii'))
+        logger.info('Cali Parameters Check')
+        time.sleep(5)
 
     def tx(self):
         if int(channel) < 5000:
             band = ID_2G
-            bands = 'offset_24g'
+            bands = 'offset'
             xcap = xcap_24
         elif int(channel) < 5500:
             band = ID_5G_LOW
@@ -1420,13 +1426,13 @@ class DUT:
             bands = 'offset'
             xcap = xcap_5
         # for 2.4g
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'\r\n')
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE stop\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE stop\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE start\r\n' % band.encode('ascii'))
         # logger(channel)
         if bw == '40':
@@ -1438,9 +1444,9 @@ class DUT:
         else:
             bws = '0'
             channels = channel
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE bw %s\r\n' % (band.encode('ascii'), bws.encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE gi 0\r\n' % band.encode('ascii'))
         if mode == '11b':
             modes = '0'
@@ -1450,18 +1456,18 @@ class DUT:
             modes = '2'
         elif mode == '11ac':
             modes = '3'
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 ATE mcs %s\r\n' % (band.encode('ascii'), rate_para.encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE mcs %s\r\n' % (band.encode('ascii'), rates.encode('ascii')))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE mode %s\r\n' % (band.encode('ascii'), modes.encode('ascii')))
         if int(channel) < 5000:
             channels = '{:.0f}'.format((int(channels) - 2407) / 5)  # 2407+5*1=2412
         else:
             channels = '{:.0f}'.format((int(channels) - 5000) / 5)  # 5000+5*36=5180
         channels = str(channels)
-        # self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        # self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         # self.tn.write(b'iw wlan%s_0 e2p get calib %s %s\r\n' % (band.encode('ascii'), chain.encode('ascii'), channels.encode('ascii')))
-        # time.sleep(1)
+        # time.sleep(int(SLEEP_TIME))
         # command_result = self.tn.read_very_eager()
         # logger.debug(command_result)
         # # pwr_word = command_result.decode('utf-8').split()[-1]
@@ -1470,45 +1476,47 @@ class DUT:
         #     logger.debug(result.decode('utf-8'))
         #     result_list.append(result.decode('utf-8'))
         # pwr_word = result_list[-4]
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE txlen 1024\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE txcnt 10000000\r\n' % band.encode('ascii'))
         # logger(channel)
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE channel %s\r\n' % (band.encode('ascii'), channels.encode('ascii')))
-        time.sleep(1)
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        time.sleep(int(SLEEP_TIME))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE ant %s\r\n' % (band.encode('ascii'), chain.encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 e2p get freq_%s\r\n' % (band.encode('ascii'), bands.encode('ascii')))
-        time.sleep(0.5)
-        command_result = self.tn.read_very_eager()
-        logger.debug(command_result)
-        # offset = command_result.decode('utf-8').split()[-1]
-        # result_list = []
-        # for result in command_result.split():
-        #     logger.debug(result.decode('utf-8'))
-        #     result_list.append(result.decode('utf-8'))
-        # offset = result_list[-4]
-        offset = xcap
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        if int(xcap) == 0:
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+            self.tn.write(b'iw wlan%s_0 e2p get freq_%s\r\n' % (band.encode('ascii'), bands.encode('ascii')))
+            time.sleep(int(SLEEP_TIME))
+            command_result = self.tn.read_very_eager()
+            logger.debug(command_result)
+            offset = command_result.decode('utf-8').split()[-1]
+            result_list = []
+            for result in command_result.split():
+                logger.debug(result.decode('utf-8'))
+                result_list.append(result.decode('utf-8'))
+            offset = result_list[-4]
+        else:
+            offset = xcap
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE TXFREQOFFSET %s\r\n' % (band.encode('ascii'), str(offset).encode('ascii')))
-        # self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        # self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         # self.tn.write(b'iw wlan%s_0 ATE pow %s %s %s %s\r\n' %
         #               (band.encode('ascii'), pwr_word.encode('ascii'),
         #                pwr_word.encode('ascii'), pwr_word.encode('ascii'), pwr_word.encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE txframe\r\n' % band.encode('ascii'))
-        # self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        # self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         # self.tn.write(b'iw wlan%s_0 ATE pow %s %s %s %s\r\n' %
         #               (band.encode('ascii'), pwr_word.encode('ascii'),
         #                pwr_word.encode('ascii'), pwr_word.encode('ascii'), pwr_word.encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 cecli temp_loop 1\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 cecli temperature\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 cecli temperature2 2\r\n' % band.encode('ascii'))
         # return pwr_word
 
@@ -1519,7 +1527,7 @@ class DUT:
             band = ID_5G_LOW
         else:
             band = ID_5G_HIGH
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE stop' % band.encode('ascii') + b'\n')
 
     def get_paras(self):
@@ -1533,8 +1541,8 @@ class DUT:
             band = ID_5G_HIGH
             channels = '{:.0f}'.format((int(channel) - 5000) / 5)
         self.tn.write(b'iw wlan%s_0 e2p get calib %s %s\r\n' % (band.encode('ascii'), chain.encode('ascii'),
-                                                               str(channels).encode('ascii')))
-        time.sleep(1)
+                                                                str(channels).encode('ascii')))
+        time.sleep(2)
         command_result = self.tn.read_very_eager()
         result_list = []
         for result in command_result.split():
@@ -1552,31 +1560,18 @@ class DUT:
         else:
             band = ID_5G_HIGH
             # power para
-        if int(channel) < 5000:
-            band = ID_2G
-            channels = '{:.0f}'.format((int(channel) - 2407) / 5)
-        elif int(channel) < 5500:
-            band = ID_5G_LOW
-            channels = '{:.0f}'.format((int(channel) - 5000) / 5)
-        else:
-            band = ID_5G_HIGH
-            channels = '{:.0f}'.format((int(channel) - 5000) / 5)
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE txcnt 10000000\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE pow %s %s %s %s\r\n' % (band.encode('ascii'), str(gain).encode('ascii'),
                                                                 str(gain).encode('ascii'),
                                                                 str(gain).encode('ascii'),
                                                                 str(gain).encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE txframe\r\n' % band.encode('ascii'))
-        self.tn.write(b'iw wlan%s_0 ATE pow %s %s %s %s\r\n' % (band.encode('ascii'), str(gain).encode('ascii'),
-                                                                str(gain).encode('ascii'),
-                                                                str(gain).encode('ascii'),
-                                                                str(gain).encode('ascii')))
         # self.tn.write(b'iw wlan%s_0 e2p get calib %s %s\r\n' % (band.encode('ascii'), chain.encode('ascii'),
         #                                                         str(channels).encode('ascii')))
-        # time.sleep(0.5)
+        # time.sleep(int(SLEEP_TIME))
         # command_result = self.tn.read_very_eager()
         # logger.debug(command_result)
         # result_list = []
@@ -1592,54 +1587,54 @@ class DUT:
     def set_default(self):
         if int(channel) < 5000:
             band = ID_2G
-            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
             self.tn.write(b'exit' + b'\n')
-            self.tn.read_until(b'SU_WAP>', timeout=1)
+            self.tn.read_until(b'SU_WAP>', timeout=int(SLEEP_TIME))
             self.tn.write(b'wifi calibrate test parameter write wifichip 1 type power len 77 value default\r\n')
             time.sleep(2)
-            self.tn.read_until(b'SU_WAP>', timeout=1)
+            self.tn.read_until(b'SU_WAP>', timeout=int(SLEEP_TIME))
             self.tn.write(b'shell' + b'\n')
-            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
             self.tn.write(b'wifi_equipment.sh init chip 1' + b'\n')
             time.sleep(2)
-            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
             self.tn.write(
                 b'hipriv.sh "vap%s set_tx_pow rf_reg_ctl 0"' % (band.encode('ascii'), band.encode('ascii')) + b'\n')
         elif int(channel) < 5500:
             band = ID_5G_LOW
-            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
             self.tn.write(b'exit' + b'\n')
-            self.tn.read_until(b'SU_WAP>', timeout=1)
+            self.tn.read_until(b'SU_WAP>', timeout=int(SLEEP_TIME))
             self.tn.write(b'wifi calibrate test parameter write wifichip 2 type power len 155 value default\r\n')
             time.sleep(2)
-            self.tn.read_until(b'SU_WAP>', timeout=1)
+            self.tn.read_until(b'SU_WAP>', timeout=int(SLEEP_TIME))
             self.tn.write(b'shell' + b'\n')
-            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
             self.tn.write(b'wifi_equipment.sh init chip 2' + b'\n')
             time.sleep(2)
-            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
             self.tn.write(
                 b'hipriv.sh "vap%s set_tx_pow rf_reg_ctl 0"' % (band.encode('ascii'), band.encode('ascii')) + b'\n')
         else:
             band = ID_5G_HIGH
-            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
             self.tn.write(b'exit' + b'\n')
-            self.tn.read_until(b'SU_WAP>', timeout=1)
+            self.tn.read_until(b'SU_WAP>', timeout=int(SLEEP_TIME))
             self.tn.write(b'wifi calibrate test parameter write wifichip 2 type power len 155 value default\r\n')
             time.sleep(2)
-            self.tn.read_until(b'SU_WAP>', timeout=1)
+            self.tn.read_until(b'SU_WAP>', timeout=int(SLEEP_TIME))
             self.tn.write(b'shell' + b'\n')
-            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
             self.tn.write(b'wifi_equipment.sh init chip 2' + b'\n')
             time.sleep(2)
-            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+            self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
             self.tn.write(
                 b'hipriv.sh "vap%s set_tx_pow rf_reg_ctl 0"' % (band.encode('ascii'), band.encode('ascii')) + b'\n')
 
     def rx(self):
         if int(channel) < 5000:
             band = ID_2G
-            bands = 'offset_24g'
+            bands = 'offset'
             xcap = xcap_24
         elif int(channel) < 5500:
             band = ID_5G_LOW
@@ -1650,13 +1645,13 @@ class DUT:
             bands = 'offset'
             xcap = xcap_5
         # for 2.4g
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 e2p get freq_%s\r\n' % (band.encode('ascii'), bands.encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE stop\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE start\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE rx_mode 1\r\n' % band.encode('ascii'))
         if bw == '40':
             bws = '1'
@@ -1667,11 +1662,11 @@ class DUT:
         else:
             bws = '0'
             channels = channel
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE bw %s\r\n' % (band.encode('ascii'), bws.encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE gi 0\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         if mode == '11b':
             modes = '0'
         elif mode == '11g' or mode == '11a':
@@ -1680,9 +1675,9 @@ class DUT:
             modes = '2'
         elif mode == '11ac':
             modes = '3'
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 ATE mcs %s\r\n' % (band.encode('ascii'), rate_para.encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE mcs %s\r\n' % (band.encode('ascii'), rates.encode('ascii')))
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE mode %s\r\n' % (band.encode('ascii'), modes.encode('ascii')))
         if int(channel) < 5000:
             channels = '{:.0f}'.format((int(channels) - 2407) / 5)  # 2407+5*1=2412
@@ -1690,13 +1685,13 @@ class DUT:
             channels = '{:.0f}'.format((int(channels) - 5000) / 5)  # 5000+5*36=5180
         channels = str(channels)
         # logger(channel)
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE channel %s\r\n' % (band.encode('ascii'), channels.encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE ant %s\r\n' % (band.encode('ascii'), chain.encode('ascii')))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE TXFREQOFFSET 40\r\n' % band.encode('ascii'))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE stat reset\r\n' % band.encode('ascii'))
         logger.info('RX COMMANDS DONE')
 
@@ -1707,7 +1702,7 @@ class DUT:
             band = ID_5G_LOW
         else:
             band = ID_5G_HIGH
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE stop\r\n' % band.encode('ascii'))
 
     def get_statistics(self):
@@ -1717,20 +1712,24 @@ class DUT:
             band = ID_5G_LOW
         else:
             band = ID_5G_HIGH
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
-        self.tn.write(b'iw wlan%s_0 ATE stat' % band.encode('ascii') + b'\n')
-        time.sleep(0.5)
-        command_result = self.tn.read_until(b'RSSI', timeout=2)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
+        self.tn.write(b'iw wlan%s_0 ATE stat\r\n' % band.encode('ascii'))
+        time.sleep(2)
+        command_result = self.tn.read_until(b'RSSI_2', timeout=2)
         logger.debug(command_result)
-        rx_success = re.findall(b'success= (\d+)', command_result)[0].decode('utf-8')
+        try:
+            rx_success = re.findall(b'success= (\d+)', command_result)[0].decode('ascii')
+        except:
+            logger.error('No packets')
+            rx_success = -1
         logger.debug(rx_success)
         if int(rx_success) < 0:
             logger.error('error')
             PER_value = 1
         else:
-            PER_value = (int(RX_PACKETS) - int(rx_success))/int(RX_PACKETS)
+            PER_value = (int(RX_PACKETS) - int(rx_success)) / int(RX_PACKETS)
             logger.info('Packets: ' + str(RX_PACKETS) + 'PER: ' + str(PER_value))
-        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=1)
+        self.tn.read_until(b'WAP(Dopra Linux) # ', timeout=int(SLEEP_TIME))
         self.tn.write(b'iw wlan%s_0 ATE stat reset\r\n' % band.encode('ascii'))
         return PER_value
 
@@ -1918,7 +1917,7 @@ if __name__ == '__main__':
     target_naj_HE160_HE5, target_naj_HE160_HE6, target_naj_HE160_HE7, target_naj_HE160_HE8, target_naj_HE160_HE9, \
     target_naj_HE160_HE10, target_naj_HE160_HE11 = [None] * 115
 
-    #report lable
+    # report lable
     gen_tx_report = gen_txmax_report = gen_rx_report = gen_rxdynamic_report = gen_aj_report = gen_naj_report = \
         gen_txmimo_report = 1
     # connect equipments and dut
@@ -1931,7 +1930,7 @@ if __name__ == '__main__':
         exit(1)
     else:
         mw_iq = iq_wanted.read_idn
-        iq_wanted.set_pathloss(PATHLOSS_WANGTED)
+        iq_wanted.set_pathloss(PATHLOSS_WANTED)
         logger.info('IQ connected!')
     try:
         iq_interfere = IQxel(IQ_IP_INTERFERE)
@@ -1978,83 +1977,113 @@ if __name__ == '__main__':
             logger.info('Band' + band)
             if cali == '1':
                 if band == '1':
-                    channel = 2412
+                    chain = '0'
+                    channel = 2442
+                    mode = '11na'
+                    bw = 20
+                    rates = 7
                     cali_channel_list = [1, 7, 11]
-                    cali_mode = '11g'
-                    cali_rate = '0'
-                    # radio_adress = '77'
-                    # upc_length = '12'
+                    default_pwr_para = 30
                 else:
-                    channel = 5180
+                    chain = '0'
+                    channel = 5500
+                    mode = '11ng'
+                    bw = 20
+                    rates = 7
                     cali_channel_list = [36, 64, 100, 120, 140, 149, 161]
-                    cali_mode = '11a'
-                    cali_rate = '6'
-                    # radio_adress = '155'
-                    # upc_length = '28'
+                    default_pwr_para = 30
                 # dt.init_cali()
                 logger.debug(band)
                 logger.info('Calibration...')
                 # ppm cali
                 logger.info('PPM Calibration...')
-                chain = '0'
-                mode = '11g/a'
-                bw = '20'
                 offset = dt.init_ppm()
                 if iq_wanted is not None:
                     iq_wanted.use_pathloss(mw_iq)
                     logger.debug('Set pathloss')
+                target_power = 18
                 iq_wanted.vsa(mw_iq)
                 iq_wanted.analysis()
                 pwr_len, txq_len, data_pwr, data_txq = iq_wanted.get_status()
                 symbol_clock_error = iq_wanted.get_ppm()
                 ppm = int(float(symbol_clock_error))
-                logger.debug('Default ppm: ' + str(ppm))
+                logger.info('Default ppm: ' + str(ppm))
                 ppm = int(offset) + ppm
                 dt.adjust_ppm(ppm)
-                time.sleep(3)
+                time.sleep(int(SLEEP_TIME))
                 iq_wanted.analysis()
                 pwr_len, txq_len, data_pwr, data_txq = iq_wanted.get_status()
                 symbol_clock_error = iq_wanted.get_ppm()
                 cali_ppm = int(float(symbol_clock_error))
-                logger.debug('Cali ppm: ' + str(cali_ppm))
+                logger.info('Cali ppm: ' + str(cali_ppm))
                 if cali_ppm > 5 or cali_ppm < -5:
                     logger.info(Fore.RED + 'PPM CALIBRATION FAIL' + Style.RESET_ALL)
                 else:
                     logger.info(Fore.GREEN + 'PPM CALIBRATION SUCCESS' + Style.RESET_ALL)
+                dt.write_ppm(ppm)
                 # power cali
                 logger.info('Power Calibration...')
-                cali_chain_list = ['0', '1']
-                cali_power_list = [200, 160, 120]
+                # cali_chain_list = ['0']
+                cali_chain_list = ['0', '1', '2', '3']
+                dt.init_cali_pwr()
                 for cali_chain in cali_chain_list:
-                    if cali_chain == '0':
-                        chain = '01'
-                    else:
-                        chain = '10'
+                    chain = cali_chain
                     for cali_channel in cali_channel_list:
-                        adjust_power_list = []
-                        dt.cali_pwr(cali_channel, chain)
                         if cali_channel < 30:
                             channel = 2407 + cali_channel * 5
                         else:
                             channel = 5000 + cali_channel * 5
-                        for cali_power in cali_power_list:
-                            dt.adjust_pwr(cali_power)
-                            iq_wanted.set_port(int(cali_power / 10))
-                            target_power = int(cali_power / 10)
-                            mode = cali_mode
-                            rates = cali_rate
+                        dt.cali_pwr(cali_channel, cali_chain)
+                        iq_wanted.vsa(mw_iq)
+                        iq_wanted.analysis()
+                        pwr_len, txq_len, data_pwr, data_txq = iq_wanted.get_status()
+                        avg_power = iq_wanted.get_power()
+                        logger.debug(avg_power)
+                        delta_power = target_power - float(avg_power)
+                        logger.debug(delta_power)
+                        adjust_power_list = []
+                        if delta_power >= 0.2 or delta_power <= -0.8:
+                            pwr_para = int(default_pwr_para + delta_power * 2)
+                            logger.debug(pwr_para)
+                            dt.adjust_pwr(pwr_para)
+                            iq_wanted.vsa(mw_iq)
                             iq_wanted.analysis()
                             pwr_len, txq_len, data_pwr, data_txq = iq_wanted.get_status()
-                            avg_power = iq_wanted.adjust_power()
-                            adjust_power = int(float(avg_power) * 10.0)
-                            adjust_power_list.append(adjust_power)
-                        dt.adjust_pwr(300)
+                            avg_power = iq_wanted.get_power()
+                            logger.debug(avg_power)
+                            adjust_power_list.append(avg_power)
+                            logger.debug(adjust_power_list)
+                            delta_power = target_power - float(avg_power)
+                            counts = 0
+                            while delta_power < -0.8 or delta_power > 0.2:
+                                if delta_power > 0.2:
+                                    pwr_para = pwr_para + 1
+                                else:
+                                    pwr_para = pwr_para - 1
+                                logger.debug(pwr_para)
+                                dt.adjust_pwr(pwr_para)
+                                iq_wanted.vsa(mw_iq)
+                                iq_wanted.analysis()
+                                pwr_len, txq_len, data_pwr, data_txq = iq_wanted.get_status()
+                                avg_power = iq_wanted.get_power()
+                                logger.debug(avg_power)
+                                adjust_power_list.append(avg_power)
+                                logger.debug(adjust_power_list)
+                                delta_power = 18.0 - float(avg_power)
+                                logger.debug(delta_power)
+                                power_increase = abs(float(adjust_power_list[-1]) - float(adjust_power_list[-2]))
+                                logger.debug(power_increase)
+                                counts += 1
+                                if counts > 30 and power_increase < 0.2:
+                                    logger.info(Fore.RED + 'Calibration Fail' + Style.RESET_ALL)
+                                    break
+                        else:
+                            pwr_para = default_pwr_para
                         dt.tx_off()
-                        logger.debug(adjust_power_list)
-                        dt.cali_pwr_write(adjust_power_list)
-                dt.cali_para_write()
-                dt.upc_write()
-                dt.crc()
+                        logger.info('Gain: ' + str(pwr_para) + ' Power: ' + str(avg_power))
+                        dt.cali_pwr_write(pwr_para)
+                        logger.debug(pwr_para)
+                dt.cali_flash_write()
                 logger.info(Fore.GREEN + 'POWER CALIBRATION SUCCESS' + Style.RESET_ALL)
             else:
                 logger.info(Fore.YELLOW + 'Calibration skip' + Style.RESET_ALL)
@@ -2174,24 +2203,24 @@ if __name__ == '__main__':
                 bw = '160'
                 rates = re.sub('HE160-HE', '', rate)
                 per_spec = 0.1
-            if rates == '1' or rates == '6':
-                rate_para = '0'
-            elif rates == '2' or rates == '9':
-                rate_para = '1'
-            elif rates == '5.5' or rates == '12':
-                rate_para = '2'
-            elif rates == '11' or rates == '18':
-                rate_para = '3'
-            elif rates == '24':
-                rate_para = '4'
-            elif rates == '36':
-                rate_para = '5'
-            elif rates == '48':
-                rate_para = '6'
-            elif rates == '54':
-                rate_para = '7'
-            else:
-                rate_para = rates
+            # if rates == '1' or rates == '6':
+            #     rate_para = '0'
+            # elif rates == '2' or rates == '9':
+            #     rate_para = '1'
+            # elif rates == '5.5' or rates == '12':
+            #     rate_para = '2'
+            # elif rates == '11' or rates == '18':
+            #     rate_para = '3'
+            # elif rates == '24':
+            #     rate_para = '4'
+            # elif rates == '36':
+            #     rate_para = '5'
+            # elif rates == '48':
+            #     rate_para = '6'
+            # elif rates == '54':
+            #     rate_para = '7'
+            # else:
+            #     rate_para = rates
             # chain
             chain = re.sub('CHAIN', '', chain)
             path = chain
@@ -2356,26 +2385,26 @@ if __name__ == '__main__':
                         writer.writerow(['FREQ', 'DATA_RATE', 'CHAIN', 'TX_POWER', 'POWER', 'GAIN', 'LIMIT',
                                          'RESULT', 'EVM', 'LIMIT', 'RESULT', 'FREQ_ERROR', 'LIMIT', 'RESULT',
                                          'LOLEAKAGE', 'LIMIT', 'RESULT', 'OBW', 'LIMIT', 'RESULT',
-                                         'MASK', 'LIMIT', 'RESULT', 'FLAsnESS', 'LIMIT', 'RESULT',
+                                         'MASK', 'LIMIT', 'RESULT', 'flatness', 'LIMIT', 'RESULT',
                                          'RAMPONTIME', 'LIMIT', 'RESULT', 'RAMPOFFTIME', 'LIMIT', 'RESULT'])
                     with open('./log/' + 'log_' + tx_result_name, 'w', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerow(['FREQ', 'DATA_RATE', 'CHAIN', 'TX_POWER', 'POWER', 'GAIN', 'LIMIT',
                                          'RESULT', 'EVM', 'LIMIT', 'RESULT', 'FREQ_ERROR', 'LIMIT', 'RESULT',
                                          'LOLEAKAGE', 'LIMIT', 'RESULT', 'OBW', 'LIMIT', 'RESULT',
-                                         'MASK', 'LIMIT', 'RESULT', 'FLAsnESS', 'LIMIT', 'RESULT',
+                                         'MASK', 'LIMIT', 'RESULT', 'flatness', 'LIMIT', 'RESULT',
                                          'RAMPONTIME', 'LIMIT', 'RESULT', 'RAMPOFFTIME', 'LIMIT', 'RESULT'])
                     gen_tx_report += 1
                 result_list = []
                 adjust_result = result_evm = result_symbol_clock_error = result_lo_leakage = result_mask = \
-                    result_flasness = 'Pass'
+                    result_flatness = 'Pass'
                 gain = dt.get_paras()
                 rate_t = re.sub('-', '_', rate)
                 rate_t = re.sub('\.', '_', rate_t)
-                targetpower = eval('target_pwr_' + rate_t)
+                target_power = eval('target_pwr_' + rate_t)
                 spec_evm = eval('target_EVM_' + rate_t)
-                power_accuracy_left = float(targetpower) - float(spec_pwr) + float(accuracy_limit_left)
-                power_accuracy_right = float(targetpower) + float(spec_pwr) - float(accuracy_limit_right)
+                power_accuracy_left = float(target_power) - float(spec_pwr) + float(accuracy_limit_left)
+                power_accuracy_right = float(target_power) + float(spec_pwr) - float(accuracy_limit_right)
                 logger.debug('Power accuracy: ' + str(power_accuracy_left) + ' ' + str(power_accuracy_right))
                 # dut tx enable
                 dt.tx()
@@ -2385,7 +2414,7 @@ if __name__ == '__main__':
                 pwr_len, txq_len, data_pwr, data_txq = iq_wanted.get_status()
                 avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask, result_list = \
                     iq_wanted.get_data(pwr_len, txq_len, data_pwr, data_txq, mode, channel, rate, chain,
-                                       tx_result_name, targetpower, spec_pwr, gain, spec_evm, evm_margin,
+                                       tx_result_name, target_power, spec_pwr, gain, spec_evm, evm_margin,
                                        spec_symbol_clock_error, spec_lo_leakage, spec_mask, spec_obw_20M, spec_obw_40M,
                                        spec_obw_80M, spec_obw_160M, result_list)
                 if AUTO_ADJUST_POWER == '1':
@@ -2393,12 +2422,12 @@ if __name__ == '__main__':
                     if avg_power == 'NA' or float(avg_power) > 99.000:
                         logger.info(Fore.RED + 'Error!' + Style.RESET_ALL)
                     else:
-                        #print(targetpower, spec_pwr, accuracy_limit_left, accuracy_limit_right)
-                        max_power = float(targetpower + spec_pwr)
-                        delta_power = float(avg_power) - float(targetpower)
+                        # print(target_power, spec_pwr, accuracy_limit_left, accuracy_limit_right)
+                        max_power = float(target_power + spec_pwr)
+                        delta_power = float(avg_power) - float(target_power)
                         delta_power = float('{:.3f}'.format(delta_power))
                         logger.debug('Default Measurer Power: ' + str(avg_power))
-                        logger.debug('Target Power: ' + str(targetpower))
+                        logger.debug('Target Power: ' + str(target_power))
                         logger.debug('Delta Power: ' + str(delta_power))
                         # power is nomal but some is fail
                         if float(power_accuracy_left) <= float(avg_power) <= float(power_accuracy_right):
@@ -2440,19 +2469,20 @@ if __name__ == '__main__':
                                 iq_wanted.vsa(mw_iq)
                                 iq_wanted.analysis()
                                 pwr_len, txq_len, data_pwr, data_txq = iq_wanted.get_status()
-                                avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask,\
+                                avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask, \
                                 result_list = \
                                     iq_wanted.get_data(pwr_len, txq_len, data_pwr, data_txq, mode, channel,
-                                                       rate, chain, tx_result_name, targetpower, spec_pwr, gain, spec_evm,
+                                                       rate, chain, tx_result_name, target_power, spec_pwr, gain,
+                                                       spec_evm,
                                                        evm_margin, spec_symbol_clock_error, spec_lo_leakage, spec_mask,
                                                        spec_obw_20M, spec_obw_40M, spec_obw_80M, spec_obw_160M,
                                                        result_list)
                                 get_power.append(avg_power)
                                 logger.debug('Measurer Power List: ' + str(get_power))
-                                delta_power = float(avg_power) - targetpower
+                                delta_power = float(avg_power) - target_power
                                 delta_power = float('{:.3f}'.format(delta_power))
                                 avg_power = float(avg_power)
-                                min_adj = float(avg_power) - float(targetpower)
+                                min_adj = float(avg_power) - float(target_power)
                                 max_adj = float(avg_power) - float(max_power)
                                 get_delta_power.append(delta_power)
                                 logger.debug('Power Deviation List: ' + str(get_delta_power))
@@ -2468,7 +2498,8 @@ if __name__ == '__main__':
                                     power_counts = power_counts + 1
                                 # logger.debug(power_counts)
                                 if power_counts > 5:
-                                    logger.info(Fore.RED + 'Power added was too small, Power adjust stop' + Style.RESET_ALL)
+                                    logger.info(
+                                        Fore.RED + 'Power added was too small, Power adjust stop' + Style.RESET_ALL)
                                     continue
                                 else:
                                     logger.debug('Step: ' + str(setup))
@@ -2476,7 +2507,8 @@ if __name__ == '__main__':
                                     gain = int(gain) + setup
                                     # gain = hex(gain)
                                     # gain = re.sub('0x', '', gain)
-                                    logger.debug(result_evm + result_symbol_clock_error + result_lo_leakage + result_mask)
+                                    logger.debug(
+                                        result_evm + result_symbol_clock_error + result_lo_leakage + result_mask)
                                     logger.info('*************************************************************')
                 result_final = result_list[-1]
                 with open('./Result/' + tx_result_name, 'a+', newline='') as write_txmax_result:
@@ -2492,26 +2524,26 @@ if __name__ == '__main__':
                         writer.writerow(['RESULT', 'FREQ', 'DATA_RATE', 'CHAIN', 'TX_POWER', 'POWER', 'GAIN', 'LIMIT',
                                          'RESULT', 'EVM', 'LIMIT', 'RESULT', 'FREQ_ERROR', 'LIMIT', 'RESULT',
                                          'LOLEAKAGE', 'LIMIT', 'RESULT', 'OBW', 'LIMIT', 'RESULT',
-                                         'MASK', 'LIMIT', 'RESULT', 'FLAsnESS', 'LIMIT', 'RESULT',
+                                         'MASK', 'LIMIT', 'RESULT', 'flatness', 'LIMIT', 'RESULT',
                                          'RAMPONTIME', 'LIMIT', 'RESULT', 'RAMPOFFTIME', 'LIMIT', 'RESULT'])
                     with open('./log/' + 'log_' + tx_result_name, 'w', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerow(['FREQ', 'DATA_RATE', 'CHAIN', 'TX_POWER', 'POWER', 'GAIN', 'LIMIT',
                                          'RESULT', 'EVM', 'LIMIT', 'RESULT', 'FREQ_ERROR', 'LIMIT', 'RESULT',
                                          'LOLEAKAGE', 'LIMIT', 'RESULT', 'OBW', 'LIMIT', 'RESULT',
-                                         'MASK', 'LIMIT', 'RESULT', 'FLAsnESS', 'LIMIT', 'RESULT',
+                                         'MASK', 'LIMIT', 'RESULT', 'flatness', 'LIMIT', 'RESULT',
                                          'RAMPONTIME', 'LIMIT', 'RESULT', 'RAMPOFFTIME', 'LIMIT', 'RESULT'])
                     gen_txmax_report += 1
                 result_list = []
                 adjust_result = result_evm = result_symbol_clock_error = result_lo_leakage = result_mask = \
-                    result_flasness = 'Pass'
+                    result_flatness = 'Pass'
                 gain = dt.get_paras()
                 rate_t = re.sub('-', '_', rate)
                 rate_t = re.sub('\.', '_', rate_t)
-                targetpower = eval('target_pwr_' + rate_t)
+                target_power = eval('target_pwr_' + rate_t)
                 spec_evm = eval('target_EVM_' + rate_t)
-                power_accuracy_left = float(targetpower) - float(spec_pwr) + float(accuracy_limit_left)
-                power_accuracy_right = float(targetpower) + float(spec_pwr) - float(accuracy_limit_right)
+                power_accuracy_left = float(target_power) - float(spec_pwr) + float(accuracy_limit_left)
+                power_accuracy_right = float(target_power) + float(spec_pwr) - float(accuracy_limit_right)
                 # dt.set_default()
                 dt.tx()
                 # RESULT
@@ -2520,7 +2552,7 @@ if __name__ == '__main__':
                 pwr_len, txq_len, data_pwr, data_txq = iq_wanted.get_status()
                 avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask, result_list = \
                     iq_wanted.get_data(pwr_len, txq_len, data_pwr, data_txq, mode, channel, rate, chain,
-                                       tx_result_name, targetpower, spec_pwr, gain, spec_evm, evm_margin,
+                                       tx_result_name, target_power, spec_pwr, gain, spec_evm, evm_margin,
                                        spec_symbol_clock_error, spec_lo_leakage, spec_mask, spec_obw_20M,
                                        spec_obw_40M, spec_obw_80M, spec_obw_160M, result_list)
                 if avg_power == 'NA' or result_evm == 'NA':
@@ -2533,15 +2565,15 @@ if __name__ == '__main__':
                 #     logger.info(Fore.RED + 'The rate\'s TX Quality is Fail, Adjust quit' + Style.RESET_ALL)
                 #     continue
                 else:
-                    logger.info('Default Measurer Power: ' + str(avg_power) + ' Target Power: ' + str(targetpower))
+                    logger.info('Default Measurer Power: ' + str(avg_power) + ' Target Power: ' + str(target_power))
                     logger.info('INIT_POWER_VALUE: ' + str(gain))
-                    delta_power = float(avg_power) - float(targetpower)
+                    delta_power = float(avg_power) - float(target_power)
                     delta_power = '{:.3f}'.format(delta_power)
                     adjust_init_power_counts = 0
                     # power is too low
-                    while float(avg_power) < float(power_accuracy_left) or\
+                    while float(avg_power) < float(power_accuracy_left) or \
                             float(avg_power) > float(power_accuracy_right):
-                        logger.debug(str(power_accuracy_left) + 'L'+ avg_power + 'R' + str(power_accuracy_right))
+                        logger.debug(str(power_accuracy_left) + 'L' + avg_power + 'R' + str(power_accuracy_right))
                         logger.info(Fore.LIGHTRED_EX + 'The power need to adjust to target power!' + Style.RESET_ALL)
                         if float(avg_power) < float(power_accuracy_left):
                             delta_power = float(avg_power) - float(power_accuracy_left)
@@ -2561,7 +2593,7 @@ if __name__ == '__main__':
                         pwr_len, txq_len, data_pwr, data_txq = iq_wanted.get_status()
                         avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask, result_list = \
                             iq_wanted.get_data(pwr_len, txq_len, data_pwr, data_txq, mode, channel, rate,
-                                               chain, tx_result_name, targetpower, spec_pwr, gain, spec_evm, evm_margin,
+                                               chain, tx_result_name, target_power, spec_pwr, gain, spec_evm, evm_margin,
                                                spec_symbol_clock_error, spec_lo_leakage, spec_mask, spec_obw_20M,
                                                spec_obw_40M, spec_obw_80M, spec_obw_160M, result_list)
                         adjust_init_power_counts = adjust_init_power_counts + 1
@@ -2593,12 +2625,12 @@ if __name__ == '__main__':
                         pwr_len, txq_len, data_pwr, data_txq = iq_wanted.get_status()
                         avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask, result_list = \
                             iq_wanted.get_data(pwr_len, txq_len, data_pwr, data_txq, mode, channel, rate,
-                                               chain, tx_result_name, targetpower, spec_pwr, gain, spec_evm, evm_margin,
+                                               chain, tx_result_name, target_power, spec_pwr, gain, spec_evm, evm_margin,
                                                spec_symbol_clock_error, spec_lo_leakage, spec_mask, spec_obw_20M,
                                                spec_obw_40M, spec_obw_80M, spec_obw_160M, result_list)
                         get_power.append(avg_power)
                         logger.debug('Measurer Power List: ' + str(get_power))
-                        delta_power = float(avg_power) - targetpower
+                        delta_power = float(avg_power) - target_power
                         delta_power = '{:.3f}'.format(delta_power)
                         delta_power = float(delta_power)
                         get_delta_power.append(delta_power)
@@ -2622,7 +2654,7 @@ if __name__ == '__main__':
                             # gain = re.sub('0x', '', gain)
                             logger.debug(result_evm + result_symbol_clock_error + result_lo_leakage + result_mask)
                             logger.info('*************************************************************')
-                result_final = result_list[len(result_list)-2]
+                result_final = result_list[len(result_list) - 2]
                 with open('./Result/' + tx_result_name, 'a+', newline='') as write_txmax_result:
                     writer_file = csv.writer(write_txmax_result)
                     writer_file.writerow(result_final)
@@ -2661,7 +2693,7 @@ if __name__ == '__main__':
                     # dt.rx(mode, channel, bw, rates, chain)
                     # dt.rx()
                     iq_wanted.vsg(mw_iq, start)
-                    time.sleep(0.2)
+                    time.sleep(int(SLEEP_TIME))
                     per = dt.get_statistics()
                     per = float(per)
                     per_list.append(per)
@@ -2708,7 +2740,7 @@ if __name__ == '__main__':
                 per_list = []
                 logger.info('Start: ' + str(start))
                 dt.get_statistics()  # reset counts
-                #dt.rx_on()
+                # dt.rx_on()
                 dt.rx()
                 # logger.debug(channel)
                 iq_wanted.vsg(mw_iq, start)
@@ -2884,17 +2916,17 @@ if __name__ == '__main__':
                         writer.writerow(['FREQ', 'DATA_RATE', 'CHAIN', 'TX_POWER', 'POWER', 'GAIN', 'LIMIT',
                                          'RESULT', 'EVM', 'LIMIT', 'RESULT', 'FREQ_ERROR', 'LIMIT', 'RESULT',
                                          'LOLEAKAGE', 'LIMIT', 'RESULT', 'OBW', 'LIMIT', 'RESULT',
-                                         'MASK', 'LIMIT', 'RESULT', 'FLAsnESS', 'LIMIT', 'RESULT',
+                                         'MASK', 'LIMIT', 'RESULT', 'flatness', 'LIMIT', 'RESULT',
                                          'RAMPONTIME', 'LIMIT', 'RESULT', 'RAMPOFFTIME', 'LIMIT', 'RESULT'])
                     gen_txmimo_report += 1
                 adjust_result = result_evm = result_symbol_clock_error = result_lo_leakage = result_mask = \
-                    result_flasness = 'Pass'
+                    result_flatness = 'Pass'
                 # dt.set_default()
                 dt.tx_mimo()
                 # RESULT
                 rate_t = re.sub('-', '_', rate)
                 rate_t = re.sub('\.', '_', rate_t)
-                targetpower = eval('target_pwr_' + rate_t)
+                target_power = eval('target_pwr_' + rate_t)
                 spec_evm = eval('target_EVM_' + rate_t)
                 iq_wanted.vsa_mimo(mw_iq)
                 iq_wanted.analysis()
@@ -2902,7 +2934,7 @@ if __name__ == '__main__':
                 avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask = \
                     iq_wanted.get_data(pwr_len, txq_len, data_pwr, data_txq, mode, channel, rate, chain,
                                        tx_result_name,
-                                       targetpower, spec_pwr, gain, spec_evm, evm_margin,
+                                       target_power, spec_pwr, gain, spec_evm, evm_margin,
                                        spec_symbol_clock_error,
                                        spec_lo_leakage, spec_mask, spec_obw_20M, spec_obw_40M, spec_obw_80M,
                                        spec_obw_160M)
@@ -2913,17 +2945,17 @@ if __name__ == '__main__':
                     else:
                         # accuracy_limit_left = 0.5
                         # accuracy_limit_right = 0.5
-                        power_accuracy_left = float(targetpower) - float(spec_pwr) + float(accuracy_limit_left)
-                        power_accuracy_right = float(targetpower) + float(spec_pwr) - float(
+                        power_accuracy_left = float(target_power) - float(spec_pwr) + float(accuracy_limit_left)
+                        power_accuracy_right = float(target_power) + float(spec_pwr) - float(
                             accuracy_limit_right)
-                        max_power = float(targetpower + spec_pwr)
-                        delta_power = float(avg_power) - float(targetpower)
+                        max_power = float(target_power + spec_pwr)
+                        delta_power = float(avg_power) - float(target_power)
                         delta_power = float('{:.3f}'.format(delta_power))
                         logger.debug('Default Measurer Power: ' + avg_power)
-                        logger.debug('Target Power: ' + targetpower)
+                        logger.debug('Target Power: ' + target_power)
                         logger.debug('Delta Power: ' + delta_power)
                         # power is nomal but some is fail
-                        if targetpower <= avg_power <= max_power:
+                        if target_power <= avg_power <= max_power:
                             if result_evm == 'Fail' or result_symbol_clock_error == 'Fail' \
                                     or result_lo_leakage == 'Fail' or result_mask == 'Fail':
                                 logger.info(Fore.RED + 'TX\'s quality are failed!' + Style.RESET_ALL)
@@ -2948,7 +2980,7 @@ if __name__ == '__main__':
                             logger.debug('Power Deviation List: ' + get_delta_power)
                             logger.debug('Adjust Counts:' + c)
                             # ADJUST
-                            min_adj = avg_power - targetpower
+                            min_adj = avg_power - target_power
                             max_adj = avg_power - max_power
                             while min_adj < 0 or max_adj > 0:
                                 logger.info(Fore.GREEN + 'Adjust...' + Style.RESET_ALL)
@@ -2965,17 +2997,17 @@ if __name__ == '__main__':
                                 avg_power, result_evm, result_symbol_clock_error, result_lo_leakage, result_mask = \
                                     iq_wanted.get_data(pwr_len, txq_len, data_pwr, data_txq, mode, channel,
                                                        rate, chain,
-                                                       tx_result_name, targetpower, spec_pwr, gain, spec_evm,
+                                                       tx_result_name, target_power, spec_pwr, gain, spec_evm,
                                                        evm_margin,
                                                        spec_symbol_clock_error, spec_lo_leakage, spec_mask,
                                                        spec_obw_20M,
                                                        spec_obw_40M, spec_obw_80M, spec_obw_160M)
                                 get_power.append(avg_power)
                                 logger.debug('Measurer Power List: ' + get_power)
-                                delta_power = float(avg_power) - targetpower
+                                delta_power = float(avg_power) - target_power
                                 delta_power = float('{:.3f}'.format(delta_power))
                                 avg_power = float(avg_power)
-                                min_adj = avg_power - targetpower
+                                min_adj = avg_power - target_power
                                 max_adj = avg_power - max_power
                                 get_delta_power.append(delta_power)
                                 logger.debug('Power Deviation List: ' + get_delta_power)
@@ -3011,4 +3043,3 @@ if __name__ == '__main__':
         iq_wanted.close()
     if iq_interfere is not None:
         iq_interfere.close()
-

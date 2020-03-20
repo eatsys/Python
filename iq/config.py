@@ -140,7 +140,7 @@ class Config:
 
     # PATHLOSS
     def pathloss_wanted_get(self):
-        pathloss_wanted = self.conf.get("PATHLOSS_SETUP", "IQ_WANGTED")
+        pathloss_wanted = self.conf.get("PATHLOSS_SETUP", "IQ_WANTED")
         logger.info(f'DUT_IP:{pathloss_wanted}')
         return pathloss_wanted
 
@@ -257,6 +257,11 @@ class Config:
         rx_dynamic = self.conf.get("TEST_SETUP", "RX Dynamic")
         logger.info(f'RX Dynamic:{rx_dynamic}')
         return rx_dynamic
+
+    def sleep_time_get(self):
+        sleep_time = self.conf.get("TEST_SETUP", "SLEEP TIME")
+        logger.info(f'Sleep Time:{sleep_time}')
+        return sleep_time
 
 
 conf = Config()
